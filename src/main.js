@@ -150,7 +150,7 @@ function createVirtualStick(root, thumb, onChange) {
   return state;
 }
 
-createVirtualStick(leftStickEl, leftThumb, (x, y) => {
+const leftStickState = createVirtualStick(leftStickEl, leftThumb, (x, y) => {
   inputState.move = normalize(x, y);
 });
 createVirtualStick(rightStickEl, rightThumb, (x, y, active) => {
@@ -233,8 +233,15 @@ function applyKeyboardMovement() {
   const keyboardMove = normalize(x, y);
   if (Math.hypot(keyboardMove.x, keyboardMove.y) > 0) {
     inputState.move = keyboardMove;
+  } else if (!leftStickState.active) {
+    inputState.move = { x: 0, y: 0 };
   }
-  inputState.attackPressed = inputState.attackPressed || keyboard.attack;
+
+  if (keyboard.attack) {
+    inputState.attackPressed = true;
+  } else if (!attackBtn.classList.contains("pressed")) {
+    inputState.attackPressed = false;
+  }
 }
 
 function maybeSendCommands(dt) {
