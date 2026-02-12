@@ -17,9 +17,7 @@ const shopPanel = document.getElementById("shop-panel");
 const shopItems = document.getElementById("shop-items");
 
 const leftStickEl = document.getElementById("left-stick");
-const rightStickEl = document.getElementById("right-stick");
 const leftThumb = document.getElementById("left-thumb");
-const rightThumb = document.getElementById("right-thumb");
 const attackBtn = document.getElementById("attack-btn");
 const smiteBtn = document.getElementById("smite-btn");
 const characterSelect = document.getElementById("character-select");
@@ -143,7 +141,6 @@ const world = {
 
 let server = new GameServer();
 let pinnedTooltip = false;
-let hoverTooltipSlot = null;
 let previousAudioState = null;
 let latestState = server.getState();
 const gameFlow = {
@@ -514,7 +511,6 @@ function restartGame() {
   shakeState.timeLeft = 0;
   shakeState.power = 0;
   pinnedTooltip = false;
-  hoverTooltipSlot = null;
   gameFlow.started = true;
   gameFlow.paused = false;
   startScreen.classList.add("hidden");
@@ -615,15 +611,6 @@ function createVirtualStick(root, thumb, onChange) {
 const leftStickState = createVirtualStick(leftStickEl, leftThumb, (x, y) => {
   inputState.move = normalize(x, y);
 });
-const rightStickState = createVirtualStick(rightStickEl, rightThumb, (x, y, active) => {
-  const aim = normalize(x, y);
-  inputState.manualAim = active && Math.hypot(x, y) > 0.2;
-  if (inputState.manualAim) {
-    inputState.aim = aim;
-  } else {
-    inputState.aim = { x: 0, y: -1 };
-  }
-});
 
 attackBtn.addEventListener("pointerdown", () => {
   if (!canAcceptGameplayInput()) {
@@ -717,21 +704,8 @@ skillQBtn.addEventListener("click", () => castSkill("q"));
 skillWBtn.addEventListener("click", () => castSkill("w"));
 skillEBtn.addEventListener("click", () => castSkill("e"));
 
-skillSlots.forEach((slot) => {
-  const button = skillButtonMap[slot];
-  button.addEventListener("pointerenter", () => {
-    hoverTooltipSlot = slot;
-  });
-  button.addEventListener("pointerleave", () => {
-    hoverTooltipSlot = null;
-  });
-});
-
 skillInfoBtn.addEventListener("click", () => {
   pinnedTooltip = !pinnedTooltip;
-  if (!pinnedTooltip) {
-    hoverTooltipSlot = null;
-  }
 });
 
 controlPresetSelect.addEventListener("change", () => {
@@ -1060,7 +1034,7 @@ function renderSkillTooltip(localPlayer) {
     return;
   }
 
-  const focusedSlot = hoverTooltipSlot;
+  const focusedSlot = null;
   const rows = skillSlots
     .map((slot) => {
       const skill = localPlayer.skills[slot];
@@ -1251,16 +1225,13 @@ function updateHUD(state) {
   const controlsLocked = !gameFlow.started || gameFlow.paused || gameFlow.settingsOpen;
 
   leftStickEl.style.pointerEvents = controlsLocked ? "none" : "auto";
-  rightStickEl.style.pointerEvents = controlsLocked ? "none" : "auto";
   if (controlsLocked) {
     inputState.move = { x: 0, y: 0 };
     inputState.manualAim = false;
+    inputState.aim = { x: 0, y: -1 };
     leftStickState.active = false;
     leftStickState.pointerId = null;
-    rightStickState.active = false;
-    rightStickState.pointerId = null;
     leftThumb.style.transform = "translate(-50%, -50%)";
-    rightThumb.style.transform = "translate(-50%, -50%)";
   }
 
   roundLabel.textContent = `R${state.round} / ${state.config.maxRounds}`;
@@ -1314,11 +1285,10 @@ function updateHUD(state) {
     const subText = skill.remaining > 0 ? `${skill.remaining.toFixed(1)}s` : "READY";
     const icon = getSkillIcon(skill, slot);
     button.innerHTML = `<span class="skill-icon">${icon}</span><span class="skill-key">${slot.toUpperCase()}</span><small>${subText}</small>`;
-    button.title = skill.description ?? skill.name;
   }
 
   renderSkillTooltip(localPlayer);
-  if (pinnedTooltip || hoverTooltipSlot) {
+  if (pinnedTooltip) {
     skillTooltipPanel.classList.remove("hidden");
     skillInfoBtn.textContent = "X";
   } else {
@@ -1516,6 +1486,14 @@ function drawPlayers(state, projection) {
     ctx.font = `${Math.max(11, projection.scale * 17)}px sans-serif`;
     ctx.textAlign = "center";
     ctx.fillText(player.name, pos.x, hpY - projection.scale * 7);
+
+    const statusY = pos.y + radius + projection.scale * 28;
+    ctx.font = `${Math.max(9, projection.scale * 11)}px sans-serif`;
+    const statusText = player.alive
+      ? `생존 · 점수 ${player.score} · 골드 ${Math.floor(player.gold)}`
+      : "관전";
+    ctx.fillStyle = player.alive ? "rgba(220, 235, 255, 0.9)" : "rgba(160, 170, 190, 0.9)";
+    ctx.fillText(statusText, pos.x, statusY);
   });
 }
 

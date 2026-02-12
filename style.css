@@ -9,11 +9,11 @@
   --right-stick-right: max(18px, env(safe-area-inset-right));
   --right-stick-bottom: var(--ctrl-margin);
   --attack-left: auto;
-  --attack-right: max(120px, calc(env(safe-area-inset-right) + 120px));
+  --attack-right: max(100px, calc(env(safe-area-inset-right) + 100px));
   --attack-bottom: var(--ctrl-margin);
   --smite-left: auto;
-  --smite-right: max(140px, calc(env(safe-area-inset-right) + 140px));
-  --smite-bottom: calc(var(--ctrl-margin) + 12vmin);
+  --smite-right: max(118px, calc(env(safe-area-inset-right) + 118px));
+  --smite-bottom: calc(var(--ctrl-margin) + 14vmin);
   --skill-left: auto;
   --skill-right: max(24px, calc(env(safe-area-inset-right) + 24px));
   --skill-bottom: calc(var(--ctrl-margin) + 24vmin);
@@ -149,8 +149,9 @@ body {
   }
 
   #shop-panel {
-    width: min(96vw, 380px);
-    padding: 8px 10px;
+    width: max-content;
+    max-width: min(96vw, 380px);
+    padding: 0;
     border-radius: 10px;
   }
 
@@ -305,27 +306,27 @@ body {
 
 #feed {
   position: absolute;
-  left: max(12px, env(safe-area-inset-left));
+  left: max(8px, env(safe-area-inset-left));
   top: 50%;
   transform: translateY(-50%);
-  width: min(320px, 72vw);
-  max-height: 3.6em;
+  width: min(200px, 52vw);
+  max-height: 3.2em;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   pointer-events: auto;
 }
 
 .feed-item {
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: rgba(6, 13, 24, 0.82);
-  border: 1px solid rgba(148, 177, 221, 0.28);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(6, 13, 24, 0.85);
+  border: 1px solid rgba(148, 177, 221, 0.22);
   color: #c6dcff;
-  font-size: clamp(9px, 1.6vmin, 11px);
+  font-size: clamp(8px, 1.4vmin, 10px);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  line-height: 1.2;
+  line-height: 1.15;
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -366,9 +367,7 @@ body {
 }
 
 #right-stick {
-  left: var(--right-stick-left);
-  right: var(--right-stick-right);
-  bottom: var(--right-stick-bottom);
+  display: none;
 }
 
 .stick-thumb {
@@ -681,12 +680,14 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(640px, calc(100vw - 24px));
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(6, 12, 22, 0.84);
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  padding: 0;
+  border-radius: 10px;
+  background: rgba(6, 12, 22, 0.9);
   border: 1px solid rgba(153, 182, 226, 0.36);
   pointer-events: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 #shop-panel.hidden {
@@ -694,44 +695,43 @@ body {
 }
 
 .shop-header {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
-  justify-content: center;
+  padding: 8px 10px 6px;
+  border-bottom: 1px solid rgba(153, 182, 226, 0.25);
+  text-align: center;
 }
 
 .shop-header h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   color: #ecf4ff;
 }
 
 .shop-header p {
-  margin: 0;
+  margin: 2px 0 0;
   color: #9fc2f4;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 #shop-items {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
+  padding: 8px;
   max-width: 100%;
 }
 
 .shop-item {
   text-align: left;
-  width: min(100px, 22vw);
-  min-width: 78px;
-  min-height: 56px;
-  border-radius: 8px;
+  width: min(88px, 20vw);
+  min-width: 70px;
+  min-height: 50px;
+  border-radius: 6px;
   border: 1px solid rgba(160, 193, 243, 0.28);
-  padding: 5px 6px;
+  padding: 4px 5px;
   background: rgba(11, 21, 36, 0.95);
   color: #deebff;
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .shop-item:disabled {
