@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Last Attack - Kraken Rush</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="game-root">
+      <canvas id="game-canvas"></canvas>
+
+      <div id="hud">
+        <div class="top-row">
+          <div class="pill" id="round-label">R1 / 8</div>
+          <div class="pill" id="phase-label">전투</div>
+          <div class="pill" id="timer-label">90.0s</div>
+          <div class="pill" id="boss-label">보스 HP</div>
+          <div class="pill" id="pattern-label">패턴 대기</div>
+          <label class="character-select-wrap">
+            캐릭터
+            <select id="character-select"></select>
+          </label>
+        </div>
+
+        <div id="player-board"></div>
+        <div id="feed"></div>
+      </div>
+
+      <div id="shop-panel" class="hidden">
+        <div class="shop-header">
+          <h2>상점 페이즈</h2>
+          <p>전투 중에는 구매할 수 없습니다.</p>
+        </div>
+        <div id="shop-items"></div>
+      </div>
+
+      <div id="controls">
+        <div id="left-stick" class="stick">
+          <div class="stick-thumb" id="left-thumb"></div>
+          <span>이동</span>
+        </div>
+
+        <div id="right-stick" class="stick">
+          <div class="stick-thumb" id="right-thumb"></div>
+          <span>조준</span>
+        </div>
+
+        <button id="attack-btn">공격</button>
+        <button id="smite-btn">강타</button>
+      </div>
+
+      <div id="overlay-message"></div>
+      <div id="rotate-warning">가로 화면으로 플레이해 주세요.</div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
