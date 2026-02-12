@@ -390,41 +390,43 @@ function safeStorageSet(key, value) {
 }
 
 function isSmallScreen() {
-  return window.innerHeight <= 520 || window.innerWidth <= 700;
+  return window.innerWidth <= 768 || window.innerHeight <= 520;
 }
 
 const MOBILE_PRESETS = {
   default: {
-    "--left-stick-left": "max(10px, env(safe-area-inset-left))",
-    "--left-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
-    "--right-stick-right": "max(10px, env(safe-area-inset-right))",
-    "--right-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
-    "--attack-right": "max(10vmin, calc(env(safe-area-inset-right) + 10vmin))",
+    "--left-stick-left": "max(8px, env(safe-area-inset-left))",
+    "--left-stick-bottom": "max(12px, 3vmin, calc(env(safe-area-inset-bottom) + 12px))",
+    "--right-stick-right": "max(8px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(12px, 3vmin, calc(env(safe-area-inset-bottom) + 12px))",
+    "--attack-right": "max(8vmin, calc(env(safe-area-inset-right) + 8vmin))",
     "--attack-left": "auto",
-    "--attack-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
-    "--smite-right": "max(12vmin, calc(env(safe-area-inset-right) + 12vmin))",
+    "--attack-bottom": "max(12px, 3vmin, calc(env(safe-area-inset-bottom) + 12px))",
+    "--smite-right": "max(8vmin, calc(env(safe-area-inset-right) + 8vmin))",
     "--smite-left": "auto",
-    "--smite-bottom": "max(14vmin, calc(env(safe-area-inset-bottom) + 14vmin))",
-    "--skill-right": "max(6vmin, calc(env(safe-area-inset-right) + 6vmin))",
+    "--smite-bottom": "max(15vmin, calc(env(safe-area-inset-bottom) + 15vmin))",
+    "--skill-right": "max(4vmin, calc(env(safe-area-inset-right) + 4vmin))",
     "--skill-left": "auto",
-    "--skill-bottom": "max(26vmin, calc(env(safe-area-inset-bottom) + 26vmin))",
+    "--skill-bottom": "max(28vmin, calc(env(safe-area-inset-bottom) + 28vmin))",
+    "--skill-tooltip-bottom": "max(38vmin, calc(env(safe-area-inset-bottom) + 38vmin))",
   },
   lefty: {
     "--left-stick-left": "auto",
-    "--left-stick-right": "max(10px, env(safe-area-inset-right))",
-    "--left-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
-    "--right-stick-left": "max(10px, env(safe-area-inset-left))",
+    "--left-stick-right": "max(8px, env(safe-area-inset-right))",
+    "--left-stick-bottom": "max(12px, 3vmin, calc(env(safe-area-inset-bottom) + 12px))",
+    "--right-stick-left": "max(8px, env(safe-area-inset-left))",
     "--right-stick-right": "auto",
-    "--right-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
-    "--attack-left": "max(10vmin, calc(env(safe-area-inset-left) + 10vmin))",
+    "--right-stick-bottom": "max(12px, 3vmin, calc(env(safe-area-inset-bottom) + 12px))",
+    "--attack-left": "max(8vmin, calc(env(safe-area-inset-left) + 8vmin))",
     "--attack-right": "auto",
-    "--attack-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
-    "--smite-left": "max(12vmin, calc(env(safe-area-inset-left) + 12vmin))",
+    "--attack-bottom": "max(12px, 3vmin, calc(env(safe-area-inset-bottom) + 12px))",
+    "--smite-left": "max(8vmin, calc(env(safe-area-inset-left) + 8vmin))",
     "--smite-right": "auto",
-    "--smite-bottom": "max(14vmin, calc(env(safe-area-inset-bottom) + 14vmin))",
-    "--skill-left": "max(6vmin, calc(env(safe-area-inset-left) + 6vmin))",
+    "--smite-bottom": "max(15vmin, calc(env(safe-area-inset-bottom) + 15vmin))",
+    "--skill-left": "max(4vmin, calc(env(safe-area-inset-left) + 4vmin))",
     "--skill-right": "auto",
-    "--skill-bottom": "max(26vmin, calc(env(safe-area-inset-bottom) + 26vmin))",
+    "--skill-bottom": "max(28vmin, calc(env(safe-area-inset-bottom) + 28vmin))",
+    "--skill-tooltip-bottom": "max(38vmin, calc(env(safe-area-inset-bottom) + 38vmin))",
   },
 };
 MOBILE_PRESETS.thumb = MOBILE_PRESETS.default;
@@ -439,6 +441,9 @@ function applyControlPreset(presetId) {
   Object.entries(preset).forEach(([cssVar, value]) => {
     document.documentElement.style.setProperty(cssVar, value);
   });
+  if (!useMobile) {
+    document.documentElement.style.removeProperty("--skill-tooltip-bottom");
+  }
   controlPresetSelect.value = id;
   settingsControlPresetSelect.value = controlPresetSelect.value;
   safeStorageSet("control-preset", controlPresetSelect.value);
@@ -751,9 +756,16 @@ settingsOpenBtn.addEventListener("click", () => {
   showSettings();
 });
 
-hudExpandBtn.addEventListener("click", () => {
+hudExpandMenu.classList.remove("expanded");
+
+function toggleHudExpand() {
   hudExpandMenu.classList.toggle("expanded");
   hudExpandBtn.setAttribute("aria-expanded", hudExpandMenu.classList.contains("expanded"));
+}
+
+hudExpandBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  toggleHudExpand();
 });
 
 pauseBtn.addEventListener("click", () => {

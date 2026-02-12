@@ -90,6 +90,99 @@ body {
   display: flex;
 }
 
+@media (max-width: 768px) {
+  .hud-expand-menu:not(.expanded) {
+    display: none !important;
+    visibility: hidden;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hud-expand-menu.expanded {
+    display: flex !important;
+    visibility: visible;
+    max-height: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .top-row .pill,
+  .hud-expand-menu .pill {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .top-row .character-select-wrap,
+  .hud-expand-menu .character-select-wrap {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+
+  .top-row #character-select,
+  .top-row #control-preset-select,
+  .top-row #render-mode-select,
+  .hud-expand-menu #character-select,
+  .hud-expand-menu #control-preset-select,
+  .hud-expand-menu #render-mode-select {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  #hud-expand-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 18px;
+    line-height: 1;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #pause-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 6px 10px;
+    font-size: 11px;
+    touch-action: manipulation;
+  }
+
+  #shop-panel {
+    width: min(96vw, 380px);
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+
+  .shop-header h2 {
+    font-size: 12px;
+  }
+
+  .shop-header p {
+    font-size: 10px;
+  }
+
+  #shop-items {
+    gap: 5px;
+  }
+
+  .shop-item {
+    width: min(72px, 20vw);
+    min-width: 64px;
+    min-height: 46px;
+    padding: 4px 5px;
+    font-size: 9px;
+  }
+
+  .shop-item strong {
+    font-size: 9px;
+  }
+
+  .shop-item small {
+    font-size: 8px;
+  }
+}
+
 .pill {
   padding: clamp(4px, 1vw, 8px) clamp(6px, 1.2vw, 12px);
   border-radius: 999px;
@@ -342,7 +435,15 @@ body {
   bottom: var(--skill-bottom);
   display: flex;
   gap: 8px;
+  align-items: flex-end;
   pointer-events: auto;
+}
+
+#skill-cluster .skill-info-btn {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: 6px;
 }
 
 .skill-btn {
@@ -408,7 +509,7 @@ body {
 .skill-info-btn {
   width: clamp(28px, 5vmin, 34px);
   min-height: clamp(28px, 5vmin, 34px);
-  align-self: flex-end;
+  flex-shrink: 0;
   border: none;
   border-radius: 8px;
   background: rgba(18, 34, 68, 0.92);
@@ -421,7 +522,7 @@ body {
   position: absolute;
   left: var(--skill-left);
   right: var(--skill-right);
-  bottom: calc(var(--skill-bottom) + 9vmin);
+  bottom: var(--skill-tooltip-bottom, calc(var(--skill-bottom) + 10vmin));
   width: min(360px, calc(100vw - 24px));
   max-height: min(280px, 48vh);
   overflow: auto;
@@ -678,14 +779,14 @@ body {
 }
 
 /* 모바일·작은 화면: 컨트롤이 화면 밑에 가려지지 않도록 여백 강화 */
-@media (max-height: 520px), (max-width: 700px) {
+@media (max-height: 520px), (max-width: 768px) {
   :root {
-    --ctrl-margin: max(14px, 4vmin, env(safe-area-inset-bottom));
+    --ctrl-margin: max(12px, 3vmin, env(safe-area-inset-bottom));
     --left-stick-bottom: var(--ctrl-margin);
     --right-stick-bottom: var(--ctrl-margin);
     --attack-bottom: var(--ctrl-margin);
-    --smite-bottom: calc(var(--ctrl-margin) + 15vmin);
-    --skill-bottom: calc(var(--ctrl-margin) + 28vmin);
+    --smite-bottom: calc(var(--ctrl-margin) + 12vmin);
+    --skill-bottom: calc(var(--ctrl-margin) + 24vmin);
   }
 }
 
