@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Last Attack - Kraken Rush</title>
+    <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -12,37 +16,40 @@
 
       <div id="hud">
         <div class="top-row">
-          <div class="pill" id="round-label">R1 / 8</div>
-          <div class="pill" id="phase-label">전투</div>
-          <div class="pill" id="timer-label">90.0s</div>
-          <div class="pill" id="boss-label">보스 HP</div>
-          <div class="pill" id="pattern-label">패턴 대기</div>
-          <div class="pill" id="perf-label">60 FPS · HIGH</div>
-          <label class="character-select-wrap">
-            캐릭터
-            <select id="character-select"></select>
-          </label>
-          <label class="character-select-wrap">
-            버튼 프리셋
-            <select id="control-preset-select">
-              <option value="default">기본</option>
-              <option value="thumb">엄지 집중</option>
-              <option value="lefty">왼손잡이</option>
-              <option value="compact">컴팩트</option>
-            </select>
-          </label>
-          <label class="character-select-wrap">
-            렌더
-            <select id="render-mode-select">
-              <option value="auto">AUTO</option>
-              <option value="high">HIGH</option>
-              <option value="balanced">BALANCED</option>
-              <option value="low">LOW</option>
-            </select>
-          </label>
-          <button id="sfx-toggle-btn" class="pill pill-button">SFX ON</button>
+          <div id="hud-expand-menu" class="hud-expand-menu">
+            <div class="pill" id="round-label">R1 / 8</div>
+            <div class="pill" id="phase-label">전투</div>
+            <div class="pill" id="timer-label">90.0s</div>
+            <div class="pill" id="boss-label">보스 HP</div>
+            <div class="pill" id="pattern-label">패턴 대기</div>
+            <div class="pill" id="perf-label">60 FPS · HIGH</div>
+            <label class="character-select-wrap">
+              캐릭터
+              <select id="character-select"></select>
+            </label>
+            <label class="character-select-wrap">
+              버튼 프리셋
+              <select id="control-preset-select">
+                <option value="default">기본</option>
+                <option value="thumb">엄지 집중</option>
+                <option value="lefty">왼손잡이</option>
+                <option value="compact">컴팩트</option>
+              </select>
+            </label>
+            <label class="character-select-wrap">
+              렌더
+              <select id="render-mode-select">
+                <option value="auto">AUTO</option>
+                <option value="high">HIGH</option>
+                <option value="balanced">BALANCED</option>
+                <option value="low">LOW</option>
+              </select>
+            </label>
+            <button id="sfx-toggle-btn" class="pill pill-button">SFX ON</button>
+            <button id="settings-open-btn" class="pill pill-button">설정</button>
+          </div>
+          <button id="hud-expand-btn" class="pill pill-button" type="button" title="메뉴">⋮</button>
           <button id="pause-btn" class="pill pill-button">일시정지</button>
-          <button id="settings-open-btn" class="pill pill-button">설정</button>
         </div>
 
         <div id="player-board"></div>

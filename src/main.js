@@ -28,6 +28,8 @@ const renderModeSelect = document.getElementById("render-mode-select");
 const sfxToggleBtn = document.getElementById("sfx-toggle-btn");
 const pauseBtn = document.getElementById("pause-btn");
 const settingsOpenBtn = document.getElementById("settings-open-btn");
+const hudExpandBtn = document.getElementById("hud-expand-btn");
+const hudExpandMenu = document.getElementById("hud-expand-menu");
 const skillQBtn = document.getElementById("skill-q-btn");
 const skillWBtn = document.getElementById("skill-w-btn");
 const skillEBtn = document.getElementById("skill-e-btn");
@@ -66,14 +68,14 @@ const CONTROL_PRESETS = {
     "--right-stick-right": "max(18px, env(safe-area-inset-right))",
     "--right-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--attack-left": "auto",
-    "--attack-right": "max(195px, calc(env(safe-area-inset-right) + 195px))",
+    "--attack-right": "max(120px, calc(env(safe-area-inset-right) + 120px))",
     "--attack-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--smite-left": "auto",
-    "--smite-right": "max(220px, calc(env(safe-area-inset-right) + 220px))",
-    "--smite-bottom": "max(130px, calc(env(safe-area-inset-bottom) + 130px))",
+    "--smite-right": "max(140px, calc(env(safe-area-inset-right) + 140px))",
+    "--smite-bottom": "max(120px, calc(env(safe-area-inset-bottom) + 12vmin))",
     "--skill-left": "auto",
-    "--skill-right": "max(96px, calc(env(safe-area-inset-right) + 96px))",
-    "--skill-bottom": "max(222px, calc(env(safe-area-inset-bottom) + 222px))",
+    "--skill-right": "max(24px, calc(env(safe-area-inset-right) + 24px))",
+    "--skill-bottom": "max(200px, calc(env(safe-area-inset-bottom) + 24vmin))",
   },
   thumb: {
     "--left-stick-left": "max(14px, env(safe-area-inset-left))",
@@ -83,14 +85,14 @@ const CONTROL_PRESETS = {
     "--right-stick-right": "max(10px, env(safe-area-inset-right))",
     "--right-stick-bottom": "max(18px, 4vmin, calc(env(safe-area-inset-bottom) + 18px))",
     "--attack-left": "auto",
-    "--attack-right": "max(136px, calc(env(safe-area-inset-right) + 136px))",
+    "--attack-right": "max(100px, calc(env(safe-area-inset-right) + 100px))",
     "--attack-bottom": "max(18px, 4vmin, calc(env(safe-area-inset-bottom) + 18px))",
     "--smite-left": "auto",
-    "--smite-right": "max(140px, calc(env(safe-area-inset-right) + 140px))",
-    "--smite-bottom": "max(118px, calc(env(safe-area-inset-bottom) + 118px))",
+    "--smite-right": "max(118px, calc(env(safe-area-inset-right) + 118px))",
+    "--smite-bottom": "max(100px, calc(env(safe-area-inset-bottom) + 12vmin))",
     "--skill-left": "auto",
-    "--skill-right": "max(32px, calc(env(safe-area-inset-right) + 32px))",
-    "--skill-bottom": "max(200px, calc(env(safe-area-inset-bottom) + 200px))",
+    "--skill-right": "max(20px, calc(env(safe-area-inset-right) + 20px))",
+    "--skill-bottom": "max(180px, calc(env(safe-area-inset-bottom) + 24vmin))",
   },
   lefty: {
     "--left-stick-left": "auto",
@@ -99,15 +101,15 @@ const CONTROL_PRESETS = {
     "--right-stick-left": "max(18px, env(safe-area-inset-left))",
     "--right-stick-right": "auto",
     "--right-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
-    "--attack-left": "max(195px, calc(env(safe-area-inset-left) + 195px))",
+    "--attack-left": "max(120px, calc(env(safe-area-inset-left) + 120px))",
     "--attack-right": "auto",
     "--attack-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
-    "--smite-left": "max(220px, calc(env(safe-area-inset-left) + 220px))",
+    "--smite-left": "max(140px, calc(env(safe-area-inset-left) + 140px))",
     "--smite-right": "auto",
-    "--smite-bottom": "max(130px, calc(env(safe-area-inset-bottom) + 130px))",
-    "--skill-left": "max(96px, calc(env(safe-area-inset-left) + 96px))",
+    "--smite-bottom": "max(120px, calc(env(safe-area-inset-bottom) + 12vmin))",
+    "--skill-left": "max(24px, calc(env(safe-area-inset-left) + 24px))",
     "--skill-right": "auto",
-    "--skill-bottom": "max(222px, calc(env(safe-area-inset-bottom) + 222px))",
+    "--skill-bottom": "max(200px, calc(env(safe-area-inset-bottom) + 24vmin))",
   },
   compact: {
     "--left-stick-left": "max(10px, env(safe-area-inset-left))",
@@ -117,14 +119,14 @@ const CONTROL_PRESETS = {
     "--right-stick-right": "max(10px, env(safe-area-inset-right))",
     "--right-stick-bottom": "max(16px, 3vmin, calc(env(safe-area-inset-bottom) + 16px))",
     "--attack-left": "auto",
-    "--attack-right": "max(132px, calc(env(safe-area-inset-right) + 132px))",
+    "--attack-right": "max(100px, calc(env(safe-area-inset-right) + 100px))",
     "--attack-bottom": "max(16px, 3vmin, calc(env(safe-area-inset-bottom) + 16px))",
     "--smite-left": "auto",
-    "--smite-right": "max(148px, calc(env(safe-area-inset-right) + 148px))",
-    "--smite-bottom": "max(108px, calc(env(safe-area-inset-bottom) + 108px))",
+    "--smite-right": "max(118px, calc(env(safe-area-inset-right) + 118px))",
+    "--smite-bottom": "max(92px, calc(env(safe-area-inset-bottom) + 11vmin))",
     "--skill-left": "auto",
-    "--skill-right": "max(24px, calc(env(safe-area-inset-right) + 24px))",
-    "--skill-bottom": "max(186px, calc(env(safe-area-inset-bottom) + 186px))",
+    "--skill-right": "max(20px, calc(env(safe-area-inset-right) + 20px))",
+    "--skill-bottom": "max(168px, calc(env(safe-area-inset-bottom) + 22vmin))",
   },
 };
 
@@ -402,10 +404,10 @@ const MOBILE_PRESETS = {
     "--attack-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
     "--smite-right": "max(12vmin, calc(env(safe-area-inset-right) + 12vmin))",
     "--smite-left": "auto",
-    "--smite-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
+    "--smite-bottom": "max(14vmin, calc(env(safe-area-inset-bottom) + 14vmin))",
     "--skill-right": "max(6vmin, calc(env(safe-area-inset-right) + 6vmin))",
     "--skill-left": "auto",
-    "--skill-bottom": "max(30vmin, calc(env(safe-area-inset-bottom) + 30vmin))",
+    "--skill-bottom": "max(26vmin, calc(env(safe-area-inset-bottom) + 26vmin))",
   },
   lefty: {
     "--left-stick-left": "auto",
@@ -419,10 +421,10 @@ const MOBILE_PRESETS = {
     "--attack-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
     "--smite-left": "max(12vmin, calc(env(safe-area-inset-left) + 12vmin))",
     "--smite-right": "auto",
-    "--smite-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
+    "--smite-bottom": "max(14vmin, calc(env(safe-area-inset-bottom) + 14vmin))",
     "--skill-left": "max(6vmin, calc(env(safe-area-inset-left) + 6vmin))",
     "--skill-right": "auto",
-    "--skill-bottom": "max(30vmin, calc(env(safe-area-inset-bottom) + 30vmin))",
+    "--skill-bottom": "max(26vmin, calc(env(safe-area-inset-bottom) + 26vmin))",
   },
 };
 MOBILE_PRESETS.thumb = MOBILE_PRESETS.default;
@@ -747,6 +749,11 @@ sfxToggleBtn.addEventListener("click", () => {
 
 settingsOpenBtn.addEventListener("click", () => {
   showSettings();
+});
+
+hudExpandBtn.addEventListener("click", () => {
+  hudExpandMenu.classList.toggle("expanded");
+  hudExpandBtn.setAttribute("aria-expanded", hudExpandMenu.classList.contains("expanded"));
 });
 
 pauseBtn.addEventListener("click", () => {
