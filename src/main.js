@@ -1275,21 +1275,21 @@ function updateHUD(state) {
   playerBoard.innerHTML = state.players
     .map((player) => {
       const hpPercent = Math.max(0, Math.min(100, (player.hp / player.maxHp) * 100));
+      const status = player.alive ? "●" : "○";
       return `<div class="player-card ${player.id === state.localPlayerId ? "me" : ""}">
-        <div class="player-name">
-          <span style="color:${player.color}">${player.name}</span>
-          <span>${player.alive ? "생존" : "관전"}</span>
-        </div>
+        <span class="player-name" style="color:${player.color}">${player.name}</span>
+        <span>${status}</span>
         <div class="hp-track"><div class="hp-fill" style="width:${hpPercent}%;background:${player.color}"></div></div>
-        <div>점수 ${player.score} (막타 ${player.lastHitScore} / 강타 ${player.smiteScore})</div>
-        <div>골드 ${Math.floor(player.gold)} · 캐릭터 ${player.characterName}</div>
+        <span class="player-stat">★${player.score}</span>
+        <span class="player-stat">🪙${Math.floor(player.gold)}</span>
       </div>`;
     })
     .join("");
 
-  feedBox.innerHTML = state.feed
+  const feedSlice = (state.feed || []).slice(-3);
+  feedBox.innerHTML = feedSlice
     .map(
-      (feed) => `<div class="feed-item">[${feed.t.toFixed(1)}] ${feed.message}</div>`
+      (feed) => `<div class="feed-item">${feed.message}</div>`
     )
     .join("");
 
@@ -1437,21 +1437,34 @@ function drawBoss(state, projection) {
   ctx.arc(bossPos.x + radius * 0.25, bossPos.y - radius * 0.18, radius * 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  const hpW = radius * 2.25;
-  const hpH = projection.scale * 22;
+  const hpW = radius * 2.4;
+  const hpH = Math.max(projection.scale * 28, 14);
   const hpX = bossPos.x - hpW / 2;
-  const hpY = bossPos.y - radius - projection.scale * 62;
+  const hpY = bossPos.y - radius - projection.scale * 72;
   const hpRate = state.boss.hp / state.boss.maxHp;
-  ctx.fillStyle = "rgba(15, 24, 40, 0.9)";
+  ctx.fillStyle = "rgba(8, 14, 26, 0.95)";
+  ctx.fillRect(hpX - 2, hpY - 2, hpW + 4, hpH + 4);
+  ctx.fillStyle = "rgba(15, 24, 40, 0.95)";
   ctx.fillRect(hpX, hpY, hpW, hpH);
-  ctx.fillStyle = state.boss.frenzy ? "#ff658c" : "#49b8ff";
+  ctx.fillStyle = state.boss.frenzy ? "#e84d75" : "#3ba3f7";
   ctx.fillRect(hpX, hpY, hpW * hpRate, hpH);
-  ctx.strokeStyle = "rgba(211, 232, 255, 0.55)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+  ctx.lineWidth = Math.max(2, projection.scale * 3);
   ctx.strokeRect(hpX, hpY, hpW, hpH);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${Math.max(13, projection.scale * 15)}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.fillText(
+    `${Math.ceil(state.boss.hp)} / ${state.boss.maxHp}`,
+    bossPos.x,
+    hpY + hpH + Math.max(14, projection.scale * 16)
+  );
 
   const smiteLineRate = state.boss.smiteDamage / state.boss.maxHp;
   const smiteX = hpX + hpW * smiteLineRate;
-  ctx.strokeStyle = "#ffe18f";
+  ctx.strokeStyle = "#ffd54f";
+  ctx.lineWidth = Math.max(2, projection.scale * 2.5);
   ctx.beginPath();
   ctx.moveTo(smiteX, hpY - 4);
   ctx.lineTo(smiteX, hpY + hpH + 4);
@@ -1508,15 +1521,20 @@ function drawPlayers(state, projection) {
 
 function drawEffects(state, projection) {
   const sliced = state.effects.slice(-renderState.maxEffects);
+  const shotTtl = 0.12;
   sliced.forEach((effect) => {
     if (effect.kind === "shot" && effect.from && effect.to) {
-      const from = project(effect.from.x, effect.from.y, projection);
-      const to = project(effect.to.x, effect.to.y, projection);
-      ctx.strokeStyle = effect.color;
-      ctx.lineWidth = Math.max(1, projection.scale * 4);
+      const progress = 1 - (effect.ttl / shotTtl);
+      const x = effect.from.x + (effect.to.x - effect.from.x) * progress;
+      const y = effect.from.y + (effect.to.y - effect.from.y) * progress;
+      const pos = project(x, y, projection);
+      const r = Math.max(3, projection.scale * 12);
+      ctx.fillStyle = effect.color ?? "rgba(255,255,255,0.9)";
       ctx.beginPath();
-      ctx.moveTo(from.x, from.y);
-      ctx.lineTo(to.x, to.y);
+      ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.6)";
+      ctx.lineWidth = Math.max(1, projection.scale * 2);
       ctx.stroke();
     } else if (effect.kind === "smiteCast" && effect.to) {
       const center = project(effect.to.x, effect.to.y, projection);
