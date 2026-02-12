@@ -101,9 +101,9 @@ function createPlayer(id, name, isBot, color, characterId) {
     position: { x: 960, y: 840 },
     damageDoneThisRound: 0,
     skillBook: {
-      q: { name: "Q", cooldown: 10, description: "" },
-      w: { name: "W", cooldown: 14, description: "" },
-      e: { name: "E", cooldown: 20, description: "" },
+      q: { name: "Q", cooldown: 10, icon: "STRIKE", description: "" },
+      w: { name: "W", cooldown: 14, icon: "BOOST", description: "" },
+      e: { name: "E", cooldown: 20, icon: "FINISH", description: "" },
     },
     skillCooldowns: {
       q: 0,
@@ -306,9 +306,9 @@ export class GameServer {
   rebuildSkillBook(player, resetCooldowns = false) {
     const definitions = player.character.getSkillDefinitions(player, this) ?? {};
     const fallback = {
-      q: { name: "Q", cooldown: 10, description: "" },
-      w: { name: "W", cooldown: 14, description: "" },
-      e: { name: "E", cooldown: 20, description: "" },
+      q: { name: "Q", cooldown: 10, icon: "STRIKE", description: "" },
+      w: { name: "W", cooldown: 14, icon: "BOOST", description: "" },
+      e: { name: "E", cooldown: 20, icon: "FINISH", description: "" },
     };
 
     player.skillBook = {
@@ -988,18 +988,21 @@ export class GameServer {
             name: player.skillBook.q.name,
             cooldown: player.skillBook.q.cooldown,
             remaining: round2(player.skillCooldowns.q),
+            icon: player.skillBook.q.icon,
             description: player.skillBook.q.description,
           },
           w: {
             name: player.skillBook.w.name,
             cooldown: player.skillBook.w.cooldown,
             remaining: round2(player.skillCooldowns.w),
+            icon: player.skillBook.w.icon,
             description: player.skillBook.w.description,
           },
           e: {
             name: player.skillBook.e.name,
             cooldown: player.skillBook.e.cooldown,
             remaining: round2(player.skillCooldowns.e),
+            icon: player.skillBook.e.icon,
             description: player.skillBook.e.description,
           },
         },

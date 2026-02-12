@@ -9,6 +9,7 @@ const phaseLabel = document.getElementById("phase-label");
 const timerLabel = document.getElementById("timer-label");
 const bossLabel = document.getElementById("boss-label");
 const patternLabel = document.getElementById("pattern-label");
+const perfLabel = document.getElementById("perf-label");
 const playerBoard = document.getElementById("player-board");
 const feedBox = document.getElementById("feed");
 const overlayMessage = document.getElementById("overlay-message");
@@ -22,14 +23,97 @@ const rightThumb = document.getElementById("right-thumb");
 const attackBtn = document.getElementById("attack-btn");
 const smiteBtn = document.getElementById("smite-btn");
 const characterSelect = document.getElementById("character-select");
+const controlPresetSelect = document.getElementById("control-preset-select");
+const renderModeSelect = document.getElementById("render-mode-select");
+const sfxToggleBtn = document.getElementById("sfx-toggle-btn");
 const skillQBtn = document.getElementById("skill-q-btn");
 const skillWBtn = document.getElementById("skill-w-btn");
 const skillEBtn = document.getElementById("skill-e-btn");
+const skillInfoBtn = document.getElementById("skill-info-btn");
+const skillTooltipPanel = document.getElementById("skill-tooltip-panel");
 
 const skillButtonMap = {
   q: skillQBtn,
   w: skillWBtn,
   e: skillEBtn,
+};
+const skillSlots = ["q", "w", "e"];
+
+const CONTROL_PRESETS = {
+  default: {
+    "--left-stick-left": "max(18px, env(safe-area-inset-left))",
+    "--left-stick-right": "auto",
+    "--left-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--right-stick-left": "auto",
+    "--right-stick-right": "max(18px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--attack-left": "auto",
+    "--attack-right": "max(195px, calc(env(safe-area-inset-right) + 195px))",
+    "--attack-bottom": "max(24px, calc(env(safe-area-inset-bottom) + 24px))",
+    "--smite-left": "auto",
+    "--smite-right": "max(220px, calc(env(safe-area-inset-right) + 220px))",
+    "--smite-bottom": "max(148px, calc(env(safe-area-inset-bottom) + 148px))",
+    "--skill-left": "auto",
+    "--skill-right": "max(96px, calc(env(safe-area-inset-right) + 96px))",
+    "--skill-bottom": "max(248px, calc(env(safe-area-inset-bottom) + 248px))",
+  },
+  thumb: {
+    "--left-stick-left": "max(14px, env(safe-area-inset-left))",
+    "--left-stick-right": "auto",
+    "--left-stick-bottom": "max(14px, env(safe-area-inset-bottom))",
+    "--right-stick-left": "auto",
+    "--right-stick-right": "max(10px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(10px, env(safe-area-inset-bottom))",
+    "--attack-left": "auto",
+    "--attack-right": "max(136px, calc(env(safe-area-inset-right) + 136px))",
+    "--attack-bottom": "max(12px, calc(env(safe-area-inset-bottom) + 12px))",
+    "--smite-left": "auto",
+    "--smite-right": "max(140px, calc(env(safe-area-inset-right) + 140px))",
+    "--smite-bottom": "max(126px, calc(env(safe-area-inset-bottom) + 126px))",
+    "--skill-left": "auto",
+    "--skill-right": "max(32px, calc(env(safe-area-inset-right) + 32px))",
+    "--skill-bottom": "max(208px, calc(env(safe-area-inset-bottom) + 208px))",
+  },
+  lefty: {
+    "--left-stick-left": "auto",
+    "--left-stick-right": "max(18px, env(safe-area-inset-right))",
+    "--left-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--right-stick-left": "max(18px, env(safe-area-inset-left))",
+    "--right-stick-right": "auto",
+    "--right-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--attack-left": "max(195px, calc(env(safe-area-inset-left) + 195px))",
+    "--attack-right": "auto",
+    "--attack-bottom": "max(24px, calc(env(safe-area-inset-bottom) + 24px))",
+    "--smite-left": "max(220px, calc(env(safe-area-inset-left) + 220px))",
+    "--smite-right": "auto",
+    "--smite-bottom": "max(148px, calc(env(safe-area-inset-bottom) + 148px))",
+    "--skill-left": "max(96px, calc(env(safe-area-inset-left) + 96px))",
+    "--skill-right": "auto",
+    "--skill-bottom": "max(248px, calc(env(safe-area-inset-bottom) + 248px))",
+  },
+  compact: {
+    "--left-stick-left": "max(8px, env(safe-area-inset-left))",
+    "--left-stick-right": "auto",
+    "--left-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--right-stick-left": "auto",
+    "--right-stick-right": "max(8px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--attack-left": "auto",
+    "--attack-right": "max(132px, calc(env(safe-area-inset-right) + 132px))",
+    "--attack-bottom": "max(10px, calc(env(safe-area-inset-bottom) + 10px))",
+    "--smite-left": "auto",
+    "--smite-right": "max(148px, calc(env(safe-area-inset-right) + 148px))",
+    "--smite-bottom": "max(118px, calc(env(safe-area-inset-bottom) + 118px))",
+    "--skill-left": "auto",
+    "--skill-right": "max(24px, calc(env(safe-area-inset-right) + 24px))",
+    "--skill-bottom": "max(194px, calc(env(safe-area-inset-bottom) + 194px))",
+  },
+};
+
+const RENDER_PROFILES = {
+  high: { scale: 1, bgLayers: 6, tentacles: 8, maxEffects: 60, showExtraWaves: true },
+  balanced: { scale: 0.86, bgLayers: 4, tentacles: 6, maxEffects: 38, showExtraWaves: true },
+  low: { scale: 0.72, bgLayers: 2, tentacles: 4, maxEffects: 20, showExtraWaves: false },
 };
 
 const world = {
@@ -38,6 +122,9 @@ const world = {
 };
 
 const server = new GameServer();
+let pinnedTooltip = false;
+let hoverTooltipSlot = null;
+let previousAudioState = null;
 
 const inputState = {
   move: { x: 0, y: 0 },
@@ -62,6 +149,123 @@ const transmitCache = {
   timer: 0,
 };
 
+const renderState = {
+  mode: "auto",
+  activeTier: "high",
+  scale: 1,
+  bgLayers: 6,
+  tentacles: 8,
+  maxEffects: 60,
+  showExtraWaves: true,
+  fpsAvg: 60,
+  fpsSampleSec: 0,
+};
+
+class SfxEngine {
+  constructor() {
+    this.enabled = safeStorageGet("sfx-enabled", "1") !== "0";
+    this.AudioCtor = window.AudioContext || window.webkitAudioContext || null;
+    this.ctx = null;
+    this.masterGain = 0.045;
+  }
+
+  ensureContext() {
+    if (!this.enabled || !this.AudioCtor) {
+      return false;
+    }
+    if (!this.ctx) {
+      this.ctx = new this.AudioCtor();
+    }
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume();
+    }
+    return true;
+  }
+
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    safeStorageSet("sfx-enabled", enabled ? "1" : "0");
+  }
+
+  tone(freq, duration, options = {}) {
+    if (!this.ensureContext()) {
+      return;
+    }
+    const ctx = this.ctx;
+    const type = options.type ?? "sine";
+    const gainValue = options.gain ?? this.masterGain;
+    const offset = options.offset ?? 0;
+    const endFreq = options.endFreq ?? null;
+    const now = ctx.currentTime + offset;
+
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    if (endFreq && endFreq > 5) {
+      osc.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
+    }
+
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.exponentialRampToValueAtTime(gainValue, now + Math.min(0.02, duration * 0.35));
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.01);
+  }
+
+  play(eventName) {
+    switch (eventName) {
+      case "skill_q":
+        this.tone(760, 0.09, { type: "triangle", gain: 0.04 });
+        break;
+      case "skill_w":
+        this.tone(480, 0.1, { type: "sine", gain: 0.04 });
+        this.tone(620, 0.08, { type: "sine", gain: 0.028, offset: 0.07 });
+        break;
+      case "skill_e":
+        this.tone(940, 0.08, { type: "square", gain: 0.04, endFreq: 290 });
+        break;
+      case "smite":
+        this.tone(230, 0.08, { type: "square", gain: 0.05 });
+        this.tone(140, 0.15, { type: "triangle", gain: 0.05, offset: 0.06 });
+        break;
+      case "frenzy":
+        this.tone(170, 0.18, { type: "sawtooth", gain: 0.05 });
+        this.tone(130, 0.22, { type: "triangle", gain: 0.03, offset: 0.08 });
+        break;
+      case "round_start":
+        this.tone(410, 0.08, { type: "sine", gain: 0.032 });
+        this.tone(520, 0.08, { type: "sine", gain: 0.032, offset: 0.08 });
+        this.tone(660, 0.1, { type: "triangle", gain: 0.04, offset: 0.16 });
+        break;
+      case "shop":
+        this.tone(700, 0.07, { type: "triangle", gain: 0.03 });
+        this.tone(880, 0.07, { type: "triangle", gain: 0.028, offset: 0.08 });
+        break;
+      case "boss_down":
+        this.tone(300, 0.13, { type: "sawtooth", gain: 0.05, endFreq: 120 });
+        break;
+      case "victory":
+        this.tone(520, 0.1, { type: "triangle", gain: 0.035 });
+        this.tone(660, 0.1, { type: "triangle", gain: 0.035, offset: 0.1 });
+        this.tone(790, 0.13, { type: "triangle", gain: 0.042, offset: 0.2 });
+        break;
+      case "defeat":
+        this.tone(290, 0.09, { type: "sawtooth", gain: 0.04 });
+        this.tone(230, 0.12, { type: "sawtooth", gain: 0.04, offset: 0.08 });
+        this.tone(170, 0.16, { type: "sawtooth", gain: 0.045, offset: 0.17 });
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+const sfx = new SfxEngine();
+
 function normalize(x, y) {
   const len = Math.hypot(x, y);
   if (len <= 0.0001) {
@@ -74,10 +278,57 @@ function vectorDiff(a, b) {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
+function safeStorageGet(key, fallback) {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore storage errors in private mode
+  }
+}
+
+function applyControlPreset(presetId) {
+  const preset = CONTROL_PRESETS[presetId] ?? CONTROL_PRESETS.default;
+  Object.entries(preset).forEach(([cssVar, value]) => {
+    document.documentElement.style.setProperty(cssVar, value);
+  });
+  controlPresetSelect.value = presetId in CONTROL_PRESETS ? presetId : "default";
+  safeStorageSet("control-preset", controlPresetSelect.value);
+}
+
+function setRenderTier(tier) {
+  if (!RENDER_PROFILES[tier]) {
+    return;
+  }
+  const changed = renderState.activeTier !== tier || renderState.scale !== RENDER_PROFILES[tier].scale;
+  renderState.activeTier = tier;
+  Object.assign(renderState, RENDER_PROFILES[tier]);
+  if (changed) {
+    resizeCanvas();
+  }
+}
+
+function applyRenderMode(mode) {
+  const allowed = ["auto", "high", "balanced", "low"];
+  renderState.mode = allowed.includes(mode) ? mode : "auto";
+  renderModeSelect.value = renderState.mode;
+  safeStorageSet("render-mode", renderState.mode);
+  if (renderState.mode !== "auto") {
+    setRenderTier(renderState.mode);
+  }
+}
+
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(window.innerWidth * dpr);
-  canvas.height = Math.floor(window.innerHeight * dpr);
+  canvas.width = Math.floor(window.innerWidth * dpr * renderState.scale);
+  canvas.height = Math.floor(window.innerHeight * dpr * renderState.scale);
   canvas.style.width = `${window.innerWidth}px`;
   canvas.style.height = `${window.innerHeight}px`;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -173,6 +424,7 @@ createVirtualStick(rightStickEl, rightThumb, (x, y, active) => {
 });
 
 attackBtn.addEventListener("pointerdown", () => {
+  sfx.ensureContext();
   inputState.attackPressed = true;
   attackBtn.classList.add("pressed");
 });
@@ -185,6 +437,7 @@ attackBtn.addEventListener("pointercancel", releaseAttack);
 attackBtn.addEventListener("pointerleave", releaseAttack);
 
 smiteBtn.addEventListener("click", () => {
+  sfx.ensureContext();
   server.queueCommand({
     type: "smite",
     playerId: server.localPlayerId,
@@ -232,6 +485,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 function castSkill(slot) {
+  sfx.ensureContext();
   server.queueCommand({
     type: "skill",
     slot,
@@ -242,6 +496,47 @@ function castSkill(slot) {
 skillQBtn.addEventListener("click", () => castSkill("q"));
 skillWBtn.addEventListener("click", () => castSkill("w"));
 skillEBtn.addEventListener("click", () => castSkill("e"));
+
+skillSlots.forEach((slot) => {
+  const button = skillButtonMap[slot];
+  button.addEventListener("pointerenter", () => {
+    hoverTooltipSlot = slot;
+  });
+  button.addEventListener("pointerleave", () => {
+    hoverTooltipSlot = null;
+  });
+});
+
+skillInfoBtn.addEventListener("click", () => {
+  pinnedTooltip = !pinnedTooltip;
+  if (!pinnedTooltip) {
+    hoverTooltipSlot = null;
+  }
+});
+
+controlPresetSelect.addEventListener("change", () => {
+  applyControlPreset(controlPresetSelect.value);
+});
+
+renderModeSelect.addEventListener("change", () => {
+  applyRenderMode(renderModeSelect.value);
+});
+
+sfxToggleBtn.addEventListener("click", () => {
+  const next = !sfx.enabled;
+  sfx.setEnabled(next);
+  if (next) {
+    sfx.ensureContext();
+  }
+  sfxToggleBtn.textContent = next ? "SFX ON" : "SFX OFF";
+});
+
+window.addEventListener("pointerdown", () => {
+  sfx.ensureContext();
+});
+window.addEventListener("keydown", () => {
+  sfx.ensureContext();
+});
 
 function applyKeyboardMovement() {
   let x = 0;
@@ -385,6 +680,131 @@ function updateShopUI(state, localPlayer) {
   });
 }
 
+function getSkillIcon(skill, slot) {
+  if (skill?.icon) {
+    return skill.icon;
+  }
+  if (slot === "q") {
+    return "STRIKE";
+  }
+  if (slot === "w") {
+    return "BOOST";
+  }
+  return "FINISH";
+}
+
+function renderSkillTooltip(localPlayer) {
+  if (!localPlayer || !localPlayer.skills) {
+    return;
+  }
+
+  const focusedSlot = hoverTooltipSlot;
+  const rows = skillSlots
+    .map((slot) => {
+      const skill = localPlayer.skills[slot];
+      if (!skill) {
+        return "";
+      }
+      const cdText = skill.remaining > 0 ? `${skill.remaining.toFixed(1)}s` : "READY";
+      const icon = getSkillIcon(skill, slot);
+      const activeClass = focusedSlot === slot ? " active" : "";
+      return `<div class="skill-tip-row${activeClass}">
+        <div class="skill-tip-chip">${slot.toUpperCase()} · ${icon}</div>
+        <div>
+          <strong>${skill.name} <small>(CD ${skill.cooldown}s / ${cdText})</small></strong>
+          <small>${skill.description ?? ""}</small>
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  skillTooltipPanel.innerHTML = `<p class="skill-tip-title">스킬 툴팁</p>${rows}`;
+}
+
+function snapshotAudioState(state, localPlayer) {
+  const skillRemain = {};
+  for (const slot of skillSlots) {
+    skillRemain[slot] = localPlayer?.skills?.[slot]?.remaining ?? 0;
+  }
+  return {
+    phase: state.phase,
+    round: state.round,
+    winnerId: state.winnerId,
+    bossFrenzy: state.boss.frenzy,
+    bossHp: state.boss.hp,
+    localSmiteUsed: localPlayer?.smiteUsed ?? false,
+    skillRemain,
+  };
+}
+
+function handleSoundTriggers(state, localPlayer) {
+  const next = snapshotAudioState(state, localPlayer);
+  if (!previousAudioState) {
+    previousAudioState = next;
+    return;
+  }
+
+  if (previousAudioState.phase !== next.phase) {
+    if (next.phase === "shop") {
+      sfx.play("shop");
+    } else if (next.phase === "battle") {
+      sfx.play("round_start");
+    } else if (next.phase === "gameOver") {
+      sfx.play(next.winnerId === state.localPlayerId ? "victory" : "defeat");
+    }
+  }
+
+  if (!previousAudioState.bossFrenzy && next.bossFrenzy) {
+    sfx.play("frenzy");
+  }
+  if (previousAudioState.bossHp > 0 && next.bossHp <= 0) {
+    sfx.play("boss_down");
+  }
+  if (!previousAudioState.localSmiteUsed && next.localSmiteUsed && next.phase === "battle") {
+    sfx.play("smite");
+  }
+
+  skillSlots.forEach((slot) => {
+    const before = previousAudioState.skillRemain[slot] ?? 0;
+    const after = next.skillRemain[slot] ?? 0;
+    if (before <= 0.05 && after > 0.3) {
+      sfx.play(`skill_${slot}`);
+    }
+  });
+
+  previousAudioState = next;
+}
+
+function updatePerfLabel() {
+  const modeLabel =
+    renderState.mode === "auto"
+      ? `AUTO/${renderState.activeTier.toUpperCase()}`
+      : renderState.activeTier.toUpperCase();
+  perfLabel.textContent = `${Math.round(renderState.fpsAvg)} FPS · ${modeLabel}`;
+}
+
+function autoTuneRender(realDt) {
+  const clamped = Math.max(0.001, Math.min(0.2, realDt));
+  const fps = 1 / clamped;
+  renderState.fpsAvg = renderState.fpsAvg * 0.92 + fps * 0.08;
+  renderState.fpsSampleSec += clamped;
+
+  if (renderState.mode !== "auto" || renderState.fpsSampleSec < 1.2) {
+    return;
+  }
+  renderState.fpsSampleSec = 0;
+
+  let targetTier = "high";
+  if (renderState.fpsAvg < 42) {
+    targetTier = "low";
+  } else if (renderState.fpsAvg < 53) {
+    targetTier = "balanced";
+  }
+  if (targetTier !== renderState.activeTier) {
+    setRenderTier(targetTier);
+  }
+}
+
 function updateHUD(state) {
   const localPlayer = state.players.find((player) => player.id === state.localPlayerId);
   const winner = state.players.find((player) => player.id === state.winnerId);
@@ -396,6 +816,7 @@ function updateHUD(state) {
   timerLabel.textContent = `${Math.max(0, state.phaseRemaining).toFixed(1)}s`;
   bossLabel.textContent = `보스 ${Math.ceil(state.boss.hp)} / ${state.boss.maxHp} · 강타 ${state.boss.smiteDamage}`;
   patternLabel.textContent = state.patternMessage + (state.boss.frenzy ? " (광란)" : "");
+  updatePerfLabel();
 
   playerBoard.innerHTML = state.players
     .map((player) => {
@@ -426,7 +847,7 @@ function updateHUD(state) {
   smiteBtn.disabled = !localPlayer || state.phase !== "battle" || !localPlayer.alive || localPlayer.smiteUsed;
   attackBtn.disabled = !localPlayer || state.phase !== "battle" || !localPlayer.alive;
 
-  for (const slot of ["q", "w", "e"]) {
+  for (const slot of skillSlots) {
     const button = skillButtonMap[slot];
     const skill = localPlayer?.skills?.[slot];
     if (!button || !skill) {
@@ -435,9 +856,19 @@ function updateHUD(state) {
     const ready = skill.remaining <= 0 && state.phase === "battle" && localPlayer.alive;
     button.disabled = !ready;
     button.classList.toggle("cooldown", !ready);
-    const subText = skill.remaining > 0 ? `${skill.remaining.toFixed(1)}s` : skill.name;
-    button.innerHTML = `<span>${slot.toUpperCase()}</span><small>${subText}</small>`;
+    const subText = skill.remaining > 0 ? `${skill.remaining.toFixed(1)}s` : "READY";
+    const icon = getSkillIcon(skill, slot);
+    button.innerHTML = `<span class="skill-icon">${icon}</span><span class="skill-key">${slot.toUpperCase()}</span><small>${subText}</small>`;
     button.title = skill.description ?? skill.name;
+  }
+
+  renderSkillTooltip(localPlayer);
+  if (pinnedTooltip || hoverTooltipSlot) {
+    skillTooltipPanel.classList.remove("hidden");
+    skillInfoBtn.textContent = "X";
+  } else {
+    skillTooltipPanel.classList.add("hidden");
+    skillInfoBtn.textContent = "?";
   }
 
   if (localPlayer && characterSelect.value !== localPlayer.characterId) {
@@ -469,7 +900,7 @@ function drawBackground(projection, nowSec) {
   ctx.fillRect(top.x, top.y, bottom.x - top.x, bottom.y - top.y);
 
   ctx.fillStyle = "rgba(120, 181, 255, 0.12)";
-  for (let i = 0; i < 6; i += 1) {
+  for (let i = 0; i < renderState.bgLayers; i += 1) {
     const y = 190 + i * 120 + Math.sin(nowSec * 0.8 + i) * 16;
     const p = project(960, y, projection);
     ctx.beginPath();
@@ -480,13 +911,25 @@ function drawBackground(projection, nowSec) {
   const floorY = project(0, 930, projection).y;
   ctx.fillStyle = "rgba(7, 18, 33, 0.88)";
   ctx.fillRect(0, floorY, canvas.width, canvas.height - floorY);
+
+  if (renderState.showExtraWaves) {
+    ctx.strokeStyle = "rgba(95, 146, 220, 0.2)";
+    ctx.lineWidth = Math.max(1, projection.scale * 2);
+    for (let i = 0; i < 2; i += 1) {
+      const y = project(960, 880 + i * 28 + Math.sin(nowSec * 1.7 + i) * 10, projection).y;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+  }
 }
 
 function drawBoss(state, projection) {
   const bossPos = project(GAME_CONFIG.arena.bossX, GAME_CONFIG.arena.bossY, projection);
   const radius = GAME_CONFIG.arena.bossRadius * projection.scale;
 
-  for (let i = 0; i < 8; i += 1) {
+  for (let i = 0; i < renderState.tentacles; i += 1) {
     const angle = (Math.PI * (0.25 + i * 0.2)) % (Math.PI * 2);
     const x = bossPos.x + Math.cos(angle) * radius * 0.7;
     const y = bossPos.y + Math.sin(angle) * radius * 0.45 + radius * 0.85;
@@ -590,7 +1033,8 @@ function drawPlayers(state, projection) {
 }
 
 function drawEffects(state, projection) {
-  state.effects.forEach((effect) => {
+  const sliced = state.effects.slice(-renderState.maxEffects);
+  sliced.forEach((effect) => {
     if (effect.kind === "shot" && effect.from && effect.to) {
       const from = project(effect.from.x, effect.from.y, projection);
       const to = project(effect.to.x, effect.to.y, projection);
@@ -645,18 +1089,32 @@ function render(state, nowSec) {
 
 buildCharacterOptions();
 buildShopButtons();
+const presetFromStorage = safeStorageGet("control-preset", "default");
+applyControlPreset(presetFromStorage);
+
+const renderModeFromStorage = safeStorageGet("render-mode", "auto");
+applyRenderMode(renderModeFromStorage);
+if (renderState.mode === "auto") {
+  setRenderTier("high");
+}
+
+sfxToggleBtn.textContent = sfx.enabled ? "SFX ON" : "SFX OFF";
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
 let previousTime = performance.now();
 function gameLoop(now) {
-  const dt = Math.min(0.04, (now - previousTime) / 1000);
+  const realDt = Math.max(0.0001, (now - previousTime) / 1000);
+  const dt = Math.min(0.04, realDt);
   previousTime = now;
+  autoTuneRender(realDt);
 
   applyKeyboardMovement();
   maybeSendCommands(dt);
   server.update(dt);
   const state = server.getState();
+  const localPlayer = state.players.find((player) => player.id === state.localPlayerId);
+  handleSoundTriggers(state, localPlayer);
 
   updateHUD(state);
   render(state, now / 1000);

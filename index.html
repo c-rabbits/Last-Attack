@@ -17,10 +17,30 @@
           <div class="pill" id="timer-label">90.0s</div>
           <div class="pill" id="boss-label">보스 HP</div>
           <div class="pill" id="pattern-label">패턴 대기</div>
+          <div class="pill" id="perf-label">60 FPS · HIGH</div>
           <label class="character-select-wrap">
             캐릭터
             <select id="character-select"></select>
           </label>
+          <label class="character-select-wrap">
+            버튼 프리셋
+            <select id="control-preset-select">
+              <option value="default">기본</option>
+              <option value="thumb">엄지 집중</option>
+              <option value="lefty">왼손잡이</option>
+              <option value="compact">컴팩트</option>
+            </select>
+          </label>
+          <label class="character-select-wrap">
+            렌더
+            <select id="render-mode-select">
+              <option value="auto">AUTO</option>
+              <option value="high">HIGH</option>
+              <option value="balanced">BALANCED</option>
+              <option value="low">LOW</option>
+            </select>
+          </label>
+          <button id="sfx-toggle-btn" class="pill pill-button">SFX ON</button>
         </div>
 
         <div id="player-board"></div>
@@ -50,11 +70,14 @@
           <button id="skill-q-btn" class="skill-btn">Q</button>
           <button id="skill-w-btn" class="skill-btn">W</button>
           <button id="skill-e-btn" class="skill-btn">E</button>
+          <button id="skill-info-btn" class="skill-info-btn">?</button>
         </div>
 
         <button id="attack-btn">공격</button>
         <button id="smite-btn">강타</button>
       </div>
+
+      <div id="skill-tooltip-panel" class="hidden"></div>
 
       <div id="overlay-message"></div>
       <div id="rotate-warning">가로 화면으로 플레이해 주세요.</div>

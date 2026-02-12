@@ -29,9 +29,9 @@ export class CharacterBase {
 
   getSkillDefinitions(_player, _server) {
     return {
-      q: { name: "Q 스킬", cooldown: 10, description: "기본 Q 스킬" },
-      w: { name: "W 스킬", cooldown: 14, description: "기본 W 스킬" },
-      e: { name: "E 스킬", cooldown: 20, description: "기본 E 스킬" },
+      q: { name: "Q 스킬", cooldown: 10, icon: "STRIKE", description: "기본 Q 스킬" },
+      w: { name: "W 스킬", cooldown: 14, icon: "BOOST", description: "기본 W 스킬" },
+      e: { name: "E 스킬", cooldown: 20, icon: "FINISH", description: "기본 E 스킬" },
     };
   }
 
@@ -106,9 +106,9 @@ class StateShiftCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "돌격 개시", cooldown: 12, description: "공격 태세 고정, 공속 증가" },
-      w: { name: "철벽 진형", cooldown: 14, description: "수비 태세 고정, 즉시 회복" },
-      e: { name: "태세 파쇄", cooldown: 20, description: "현재 태세 기반 강타 스킬" },
+      q: { name: "돌격 개시", cooldown: 12, icon: "RUSH", description: "공격 태세 고정, 공속 증가" },
+      w: { name: "철벽 진형", cooldown: 14, icon: "GUARD", description: "수비 태세 고정, 즉시 회복" },
+      e: { name: "태세 파쇄", cooldown: 20, icon: "BREAK", description: "현재 태세 기반 강타 스킬" },
     };
   }
 
@@ -193,9 +193,9 @@ class MagicWandCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "비전 탄막", cooldown: 10, description: "다중 탄막으로 강한 누적 피해" },
-      w: { name: "마력 응축", cooldown: 16, description: "스택 획득, 공속 강화, 회복" },
-      e: { name: "오버차지 폭발", cooldown: 22, description: "스택 소모 폭발 피해" },
+      q: { name: "비전 탄막", cooldown: 10, icon: "ARC", description: "다중 탄막으로 강한 누적 피해" },
+      w: { name: "마력 응축", cooldown: 16, icon: "MANA", description: "스택 획득, 공속 강화, 회복" },
+      e: { name: "오버차지 폭발", cooldown: 22, icon: "BLAST", description: "스택 소모 폭발 피해" },
     };
   }
 
@@ -270,9 +270,9 @@ class BoomerangCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "리턴 부메랑", cooldown: 11, description: "왕복 2타를 즉시 판정" },
-      w: { name: "수렵 본능", cooldown: 15, description: "이속/공속 강화 및 소량 회복" },
-      e: { name: "승점 각성", cooldown: 24, description: "점수 비례 마무리 스킬" },
+      q: { name: "리턴 부메랑", cooldown: 11, icon: "RETURN", description: "왕복 2타를 즉시 판정" },
+      w: { name: "수렵 본능", cooldown: 15, icon: "HUNT", description: "이속/공속 강화 및 소량 회복" },
+      e: { name: "승점 각성", cooldown: 24, icon: "SCORE", description: "점수 비례 마무리 스킬" },
     };
   }
 
@@ -328,9 +328,9 @@ class BowCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "관통 화살", cooldown: 9, description: "공속 비례 단일 강타" },
-      w: { name: "집중 사격", cooldown: 14, description: "다음 평타 5회 강화" },
-      e: { name: "폭우 사격", cooldown: 20, description: "다단 히트 난사" },
+      q: { name: "관통 화살", cooldown: 9, icon: "PIERCE", description: "공속 비례 단일 강타" },
+      w: { name: "집중 사격", cooldown: 14, icon: "FOCUS", description: "다음 평타 5회 강화" },
+      e: { name: "폭우 사격", cooldown: 20, icon: "BARRAGE", description: "다단 히트 난사" },
     };
   }
 
@@ -418,9 +418,9 @@ class CrossbowCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "리듬 브레이크", cooldown: 8, description: "리듬 성공 시 큰 피해" },
-      w: { name: "기동 재장전", cooldown: 13, description: "재장전 초기화 + 기동 강화" },
-      e: { name: "전환 포격", cooldown: 21, description: "이동 에너지 소모 포격" },
+      q: { name: "리듬 브레이크", cooldown: 8, icon: "RHYTHM", description: "리듬 성공 시 큰 피해" },
+      w: { name: "기동 재장전", cooldown: 13, icon: "DASH", description: "재장전 초기화 + 기동 강화" },
+      e: { name: "전환 포격", cooldown: 21, icon: "SIEGE", description: "이동 에너지 소모 포격" },
     };
   }
 

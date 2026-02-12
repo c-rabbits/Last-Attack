@@ -1,6 +1,21 @@
 :root {
   color-scheme: dark;
   font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+  --left-stick-left: max(18px, env(safe-area-inset-left));
+  --left-stick-right: auto;
+  --left-stick-bottom: max(18px, env(safe-area-inset-bottom));
+  --right-stick-left: auto;
+  --right-stick-right: max(18px, env(safe-area-inset-right));
+  --right-stick-bottom: max(18px, env(safe-area-inset-bottom));
+  --attack-left: auto;
+  --attack-right: max(195px, calc(env(safe-area-inset-right) + 195px));
+  --attack-bottom: max(24px, calc(env(safe-area-inset-bottom) + 24px));
+  --smite-left: auto;
+  --smite-right: max(220px, calc(env(safe-area-inset-right) + 220px));
+  --smite-bottom: max(148px, calc(env(safe-area-inset-bottom) + 148px));
+  --skill-left: auto;
+  --skill-right: max(96px, calc(env(safe-area-inset-right) + 96px));
+  --skill-bottom: max(248px, calc(env(safe-area-inset-bottom) + 248px));
 }
 
 * {
@@ -61,6 +76,15 @@ body {
   backdrop-filter: blur(4px);
 }
 
+.pill-button {
+  border: 1px solid rgba(148, 177, 221, 0.45);
+  cursor: pointer;
+}
+
+#perf-label {
+  font-family: "Consolas", "SFMono-Regular", monospace;
+}
+
 .character-select-wrap {
   display: inline-flex;
   gap: 8px;
@@ -73,7 +97,9 @@ body {
   font-size: 13px;
 }
 
-#character-select {
+#character-select,
+#control-preset-select,
+#render-mode-select {
   background: #0a1320;
   color: #e8f3ff;
   border: 1px solid rgba(148, 177, 221, 0.45);
@@ -167,13 +193,15 @@ body {
 }
 
 #left-stick {
-  left: max(18px, env(safe-area-inset-left));
-  bottom: max(18px, env(safe-area-inset-bottom));
+  left: var(--left-stick-left);
+  right: var(--left-stick-right);
+  bottom: var(--left-stick-bottom);
 }
 
 #right-stick {
-  right: max(18px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
+  left: var(--right-stick-left);
+  right: var(--right-stick-right);
+  bottom: var(--right-stick-bottom);
 }
 
 .stick-thumb {
@@ -209,8 +237,9 @@ body {
 #attack-btn {
   width: 112px;
   height: 112px;
-  right: max(195px, calc(env(safe-area-inset-right) + 195px));
-  bottom: max(24px, calc(env(safe-area-inset-bottom) + 24px));
+  left: var(--attack-left);
+  right: var(--attack-right);
+  bottom: var(--attack-bottom);
   background: radial-gradient(circle at 30% 25%, #ffd579, #d56d1b);
 }
 
@@ -222,8 +251,9 @@ body {
 #smite-btn {
   width: 88px;
   height: 88px;
-  right: max(220px, calc(env(safe-area-inset-right) + 220px));
-  bottom: max(148px, calc(env(safe-area-inset-bottom) + 148px));
+  left: var(--smite-left);
+  right: var(--smite-right);
+  bottom: var(--smite-bottom);
   background: radial-gradient(circle at 30% 25%, #fbd1ff, #8f44e1);
 }
 
@@ -234,8 +264,9 @@ body {
 
 #skill-cluster {
   position: absolute;
-  right: max(96px, calc(env(safe-area-inset-right) + 96px));
-  bottom: max(248px, calc(env(safe-area-inset-bottom) + 248px));
+  left: var(--skill-left);
+  right: var(--skill-right);
+  bottom: var(--skill-bottom);
   display: flex;
   gap: 8px;
   pointer-events: auto;
@@ -259,6 +290,24 @@ body {
   align-items: center;
 }
 
+.skill-btn .skill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  border-radius: 999px;
+  background: rgba(7, 20, 49, 0.45);
+  border: 1px solid rgba(180, 211, 255, 0.45);
+  font-size: 10px;
+  letter-spacing: 0.2px;
+  padding: 2px 7px;
+}
+
+.skill-btn .skill-key {
+  font-size: 12px;
+  opacity: 0.92;
+}
+
 .skill-btn small {
   font-size: 10px;
   opacity: 0.92;
@@ -274,6 +323,78 @@ body {
 
 .skill-btn:disabled {
   opacity: 0.58;
+}
+
+.skill-info-btn {
+  width: 34px;
+  min-height: 34px;
+  align-self: flex-end;
+  border: none;
+  border-radius: 10px;
+  background: rgba(18, 34, 68, 0.92);
+  color: #e4f0ff;
+  font-weight: 700;
+}
+
+#skill-tooltip-panel {
+  position: absolute;
+  left: var(--skill-left);
+  right: var(--skill-right);
+  bottom: calc(var(--skill-bottom) + 92px);
+  width: min(360px, calc(100vw - 24px));
+  max-height: 280px;
+  overflow: auto;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(166, 197, 247, 0.4);
+  background: rgba(8, 15, 29, 0.9);
+  color: #e7f2ff;
+  pointer-events: auto;
+}
+
+#skill-tooltip-panel.hidden {
+  display: none;
+}
+
+.skill-tip-title {
+  margin: 0 0 7px;
+  font-size: 13px;
+  color: #b8d4ff;
+}
+
+.skill-tip-row {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.skill-tip-row.active {
+  background: rgba(53, 88, 150, 0.2);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.skill-tip-chip {
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(169, 204, 255, 0.45);
+  text-align: center;
+  font-size: 11px;
+  color: #cbe2ff;
+}
+
+.skill-tip-row strong {
+  display: block;
+  font-size: 13px;
+}
+
+.skill-tip-row small {
+  display: block;
+  color: #9fc3f8;
+  line-height: 1.26;
+  margin-top: 1px;
 }
 
 #shop-panel {
