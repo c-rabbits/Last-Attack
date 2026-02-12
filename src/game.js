@@ -100,11 +100,22 @@ function createPlayer(id, name, isBot, color, characterId) {
     },
     position: { x: 960, y: 840 },
     damageDoneThisRound: 0,
+    skillBook: {
+      q: { name: "Q", cooldown: 10, description: "" },
+      w: { name: "W", cooldown: 14, description: "" },
+      e: { name: "E", cooldown: 20, description: "" },
+    },
+    skillCooldowns: {
+      q: 0,
+      w: 0,
+      e: 0,
+    },
     botState: {
       targetX: 960,
       targetY: 780,
       moveTimer: 0,
       boughtInShop: false,
+      skillThinkTimer: 0.8,
     },
   };
 }
@@ -132,6 +143,8 @@ export class GameServer {
       createPlayer("P2", "AI 루나", true, "#FFCF5A", "wand"),
       createPlayer("P3", "AI 카이", true, "#FF7AA8", "boomerang"),
     ];
+
+    this.players.forEach((player) => this.rebuildSkillBook(player, true));
 
     this.spawnPlayers();
     this.startRound(1);
@@ -216,10 +229,12 @@ export class GameServer {
       player.status.ink = 0;
       player.damageDoneThisRound = 0;
       player.botState.boughtInShop = false;
+      player.botState.skillThinkTimer = 0.6 + Math.random() * 0.5;
       player.attackCooldown = index * 0.07;
+      player.character.onRoundStart(player, this);
+      this.rebuildSkillBook(player, true);
       this.recomputePlayerStats(player);
       player.hp = player.maxHp;
-      player.character.onRoundStart(player, this);
       this.roundDamage[player.id] = 0;
     });
 
@@ -288,6 +303,102 @@ export class GameServer {
     return stats;
   }
 
+  rebuildSkillBook(player, resetCooldowns = false) {
+    const definitions = player.character.getSkillDefinitions(player, this) ?? {};
+    const fallback = {
+      q: { name: "Q", cooldown: 10, description: "" },
+      w: { name: "W", cooldown: 14, description: "" },
+      e: { name: "E", cooldown: 20, description: "" },
+    };
+
+    player.skillBook = {
+      q: { ...fallback.q, ...(definitions.q ?? {}) },
+      w: { ...fallback.w, ...(definitions.w ?? {}) },
+      e: { ...fallback.e, ...(definitions.e ?? {}) },
+    };
+
+    if (resetCooldowns) {
+      player.skillCooldowns.q = 0;
+      player.skillCooldowns.w = 0;
+      player.skillCooldowns.e = 0;
+    } else {
+      player.skillCooldowns.q = clamp(player.skillCooldowns.q, 0, player.skillBook.q.cooldown);
+      player.skillCooldowns.w = clamp(player.skillCooldowns.w, 0, player.skillBook.w.cooldown);
+      player.skillCooldowns.e = clamp(player.skillCooldowns.e, 0, player.skillBook.e.cooldown);
+    }
+  }
+
+  tickSkillCooldowns(player, dt) {
+    player.skillCooldowns.q = Math.max(0, player.skillCooldowns.q - dt);
+    player.skillCooldowns.w = Math.max(0, player.skillCooldowns.w - dt);
+    player.skillCooldowns.e = Math.max(0, player.skillCooldowns.e - dt);
+  }
+
+  healPlayer(player, amount) {
+    const before = player.hp;
+    player.hp = clamp(player.hp + amount, 0, player.maxHp);
+    return player.hp - before;
+  }
+
+  movePlayerBy(player, dx, dy) {
+    player.position.x = clamp(
+      player.position.x + dx,
+      GAME_CONFIG.arena.playerMinX,
+      GAME_CONFIG.arena.playerMaxX
+    );
+    player.position.y = clamp(
+      player.position.y + dy,
+      GAME_CONFIG.arena.playerMinY,
+      GAME_CONFIG.arena.playerMaxY
+    );
+  }
+
+  spawnSkillEffect(player, color = player.color) {
+    this.effects.push({
+      kind: "skillBurst",
+      ttl: 0.28,
+      from: { ...player.position },
+      color,
+    });
+  }
+
+  dealSkillDamage(player, amount, label = "스킬") {
+    if (this.phase !== "battle" || this.boss.hp <= 0 || !player.alive) {
+      return;
+    }
+    this.applyDamageToBoss(player, amount, "skill", this.commandCounter + 1);
+    this.effects.push({
+      kind: "skillShot",
+      ttl: 0.2,
+      from: { ...player.position },
+      to: { x: GAME_CONFIG.arena.bossX, y: GAME_CONFIG.arena.bossY + 20 },
+      color: player.color,
+      label,
+    });
+  }
+
+  tryCastSkill(player, slot) {
+    if (this.phase !== "battle" || !player.alive || this.boss.hp <= 0) {
+      return false;
+    }
+    if (!["q", "w", "e"].includes(slot)) {
+      return false;
+    }
+
+    this.rebuildSkillBook(player, false);
+    if (player.skillCooldowns[slot] > 0) {
+      return false;
+    }
+
+    const casted = player.character.castSkill(slot, player, this);
+    if (!casted) {
+      return false;
+    }
+
+    player.skillCooldowns[slot] = player.skillBook[slot].cooldown;
+    return true;
+  }
+
   processCommands() {
     this.commandQueue.sort((a, b) => a.arrival - b.arrival || a.order - b.order);
     while (this.commandQueue.length > 0 && this.commandQueue[0].arrival <= this.serverTime + 1e-6) {
@@ -317,6 +428,9 @@ export class GameServer {
         case "character":
           this.tryChangeCharacter(player, command.characterId);
           break;
+        case "skill":
+          this.tryCastSkill(player, command.slot);
+          break;
         default:
           break;
       }
@@ -336,6 +450,7 @@ export class GameServer {
     player.character = createCharacter(characterId);
     player.characterState = {};
     player.character.onRoundStart(player, this);
+    this.rebuildSkillBook(player, true);
     this.recomputePlayerStats(player);
     this.pushFeed(`${player.name} 캐릭터 변경: ${player.character.name}`);
   }
@@ -494,6 +609,7 @@ export class GameServer {
   updatePlayers(dt) {
     this.players.forEach((player) => {
       player.character.onUpdate(player, dt, this);
+      this.tickSkillCooldowns(player, dt);
       this.recomputePlayerStats(player);
 
       if (!player.alive) {
@@ -754,6 +870,31 @@ export class GameServer {
           networkLagMs: 15 + Math.random() * 65,
         });
       }
+
+      player.botState.skillThinkTimer -= dt;
+      if (player.botState.skillThinkTimer <= 0) {
+        player.botState.skillThinkTimer = 0.8 + Math.random() * 1.2;
+        const hpRate = player.hp / player.maxHp;
+        const bossHpRate = this.boss.hp / this.boss.maxHp;
+
+        let slot = null;
+        if (hpRate < 0.55 && player.skillCooldowns.w <= 0) {
+          slot = "w";
+        } else if (bossHpRate < 0.45 && player.skillCooldowns.e <= 0) {
+          slot = "e";
+        } else if (player.skillCooldowns.q <= 0) {
+          slot = "q";
+        }
+
+        if (slot) {
+          this.queueCommand({
+            type: "skill",
+            slot,
+            playerId: player.id,
+            networkLagMs: 8 + Math.random() * 30,
+          });
+        }
+      }
     });
   }
 
@@ -841,6 +982,26 @@ export class GameServer {
           normal: [...player.inventory.normal],
           boots: player.inventory.boots,
           ultimate: player.inventory.ultimate,
+        },
+        skills: {
+          q: {
+            name: player.skillBook.q.name,
+            cooldown: player.skillBook.q.cooldown,
+            remaining: round2(player.skillCooldowns.q),
+            description: player.skillBook.q.description,
+          },
+          w: {
+            name: player.skillBook.w.name,
+            cooldown: player.skillBook.w.cooldown,
+            remaining: round2(player.skillCooldowns.w),
+            description: player.skillBook.w.description,
+          },
+          e: {
+            name: player.skillBook.e.name,
+            cooldown: player.skillBook.e.cooldown,
+            remaining: round2(player.skillCooldowns.e),
+            description: player.skillBook.e.description,
+          },
         },
       })),
       roundDamage: { ...this.roundDamage },

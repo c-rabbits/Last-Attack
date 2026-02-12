@@ -200,6 +200,12 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
+#attack-btn:disabled,
+#smite-btn:disabled {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
 #attack-btn {
   width: 112px;
   height: 112px;
@@ -224,6 +230,50 @@ body {
 #smite-btn.used {
   opacity: 0.4;
   filter: grayscale(0.8);
+}
+
+#skill-cluster {
+  position: absolute;
+  right: max(96px, calc(env(safe-area-inset-right) + 96px));
+  bottom: max(248px, calc(env(safe-area-inset-bottom) + 248px));
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.skill-btn {
+  width: 88px;
+  min-height: 70px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #5388ff, #2f4fbe);
+  color: #eef5ff;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.15;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  align-items: center;
+}
+
+.skill-btn small {
+  font-size: 10px;
+  opacity: 0.92;
+  max-width: 82px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-btn.cooldown {
+  background: linear-gradient(180deg, #545f76, #3d4456);
+}
+
+.skill-btn:disabled {
+  opacity: 0.58;
 }
 
 #shop-panel {

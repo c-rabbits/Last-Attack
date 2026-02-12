@@ -22,6 +22,15 @@ const rightThumb = document.getElementById("right-thumb");
 const attackBtn = document.getElementById("attack-btn");
 const smiteBtn = document.getElementById("smite-btn");
 const characterSelect = document.getElementById("character-select");
+const skillQBtn = document.getElementById("skill-q-btn");
+const skillWBtn = document.getElementById("skill-w-btn");
+const skillEBtn = document.getElementById("skill-e-btn");
+
+const skillButtonMap = {
+  q: skillQBtn,
+  w: skillWBtn,
+  e: skillEBtn,
+};
 
 const world = {
   width: GAME_CONFIG.arena.width,
@@ -183,37 +192,56 @@ smiteBtn.addEventListener("click", () => {
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.code === "KeyW" || event.code === "ArrowUp") {
+  if (event.code === "ArrowUp") {
     keyboard.up = true;
-  } else if (event.code === "KeyS" || event.code === "ArrowDown") {
+  } else if (event.code === "ArrowDown") {
     keyboard.down = true;
-  } else if (event.code === "KeyA" || event.code === "ArrowLeft") {
+  } else if (event.code === "ArrowLeft") {
     keyboard.left = true;
-  } else if (event.code === "KeyD" || event.code === "ArrowRight") {
+  } else if (event.code === "ArrowRight") {
     keyboard.right = true;
-  } else if (event.code === "Space" || event.code === "KeyJ") {
+  } else if (event.code === "Space") {
     keyboard.attack = true;
   } else if (event.code === "KeyF") {
     server.queueCommand({
       type: "smite",
       playerId: server.localPlayerId,
     });
+  } else if (!event.repeat && (event.code === "KeyQ" || event.code === "KeyW" || event.code === "KeyE")) {
+    const slot = event.code.slice(-1).toLowerCase();
+    server.queueCommand({
+      type: "skill",
+      slot,
+      playerId: server.localPlayerId,
+    });
   }
 });
 
 window.addEventListener("keyup", (event) => {
-  if (event.code === "KeyW" || event.code === "ArrowUp") {
+  if (event.code === "ArrowUp") {
     keyboard.up = false;
-  } else if (event.code === "KeyS" || event.code === "ArrowDown") {
+  } else if (event.code === "ArrowDown") {
     keyboard.down = false;
-  } else if (event.code === "KeyA" || event.code === "ArrowLeft") {
+  } else if (event.code === "ArrowLeft") {
     keyboard.left = false;
-  } else if (event.code === "KeyD" || event.code === "ArrowRight") {
+  } else if (event.code === "ArrowRight") {
     keyboard.right = false;
-  } else if (event.code === "Space" || event.code === "KeyJ") {
+  } else if (event.code === "Space") {
     keyboard.attack = false;
   }
 });
+
+function castSkill(slot) {
+  server.queueCommand({
+    type: "skill",
+    slot,
+    playerId: server.localPlayerId,
+  });
+}
+
+skillQBtn.addEventListener("click", () => castSkill("q"));
+skillWBtn.addEventListener("click", () => castSkill("w"));
+skillEBtn.addEventListener("click", () => castSkill("e"));
 
 function applyKeyboardMovement() {
   let x = 0;
@@ -395,6 +423,22 @@ function updateHUD(state) {
   } else {
     smiteBtn.classList.remove("used");
   }
+  smiteBtn.disabled = !localPlayer || state.phase !== "battle" || !localPlayer.alive || localPlayer.smiteUsed;
+  attackBtn.disabled = !localPlayer || state.phase !== "battle" || !localPlayer.alive;
+
+  for (const slot of ["q", "w", "e"]) {
+    const button = skillButtonMap[slot];
+    const skill = localPlayer?.skills?.[slot];
+    if (!button || !skill) {
+      continue;
+    }
+    const ready = skill.remaining <= 0 && state.phase === "battle" && localPlayer.alive;
+    button.disabled = !ready;
+    button.classList.toggle("cooldown", !ready);
+    const subText = skill.remaining > 0 ? `${skill.remaining.toFixed(1)}s` : skill.name;
+    button.innerHTML = `<span>${slot.toUpperCase()}</span><small>${subText}</small>`;
+    button.title = skill.description ?? skill.name;
+  }
 
   if (localPlayer && characterSelect.value !== localPlayer.characterId) {
     characterSelect.value = localPlayer.characterId;
@@ -563,6 +607,23 @@ function drawEffects(state, projection) {
       ctx.lineWidth = Math.max(2, projection.scale * 8);
       ctx.beginPath();
       ctx.arc(center.x, center.y, projection.scale * (120 + (1 - alpha) * 170), 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (effect.kind === "skillShot" && effect.from && effect.to) {
+      const from = project(effect.from.x, effect.from.y, projection);
+      const to = project(effect.to.x, effect.to.y, projection);
+      ctx.strokeStyle = effect.color;
+      ctx.lineWidth = Math.max(2, projection.scale * 7);
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+    } else if (effect.kind === "skillBurst" && effect.from) {
+      const center = project(effect.from.x, effect.from.y, projection);
+      const alpha = Math.max(0, effect.ttl / 0.28);
+      ctx.strokeStyle = `rgba(205, 228, 255, ${0.8 * alpha})`;
+      ctx.lineWidth = Math.max(2, projection.scale * 5);
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, projection.scale * (25 + (1 - alpha) * 45), 0, Math.PI * 2);
       ctx.stroke();
     }
   });
