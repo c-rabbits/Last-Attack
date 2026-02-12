@@ -1,0 +1,10 @@
+{
+  "name": "Last Attack - Kraken Rush",
+  "short_name": "Last Attack",
+  "description": "8라운드 안에 강타와 막타 경쟁으로 3점을 먼저 달성하세요.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#050d18",
+  "theme_color": "#050d18"
+}

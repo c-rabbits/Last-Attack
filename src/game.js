@@ -187,15 +187,15 @@ export class GameServer {
   }
 
   spawnPlayers() {
-    const spawnPoints = [
-      { x: 760, y: 850 },
-      { x: 960, y: 880 },
-      { x: 1160, y: 850 },
-    ];
+    const zones = GAME_CONFIG.playerZones;
     this.players.forEach((player, index) => {
-      const point = spawnPoints[index] ?? spawnPoints[0];
-      player.position.x = point.x;
-      player.position.y = point.y;
+      const zone = zones[index] ?? zones[0];
+      const centerX = (zone.minX + zone.maxX) / 2;
+      const centerY = (GAME_CONFIG.arena.playerMinY + GAME_CONFIG.arena.playerMaxY) / 2;
+      player.position.x = centerX;
+      player.position.y = centerY;
+      player.zoneMinX = zone.minX;
+      player.zoneMaxX = zone.maxX;
       player.velocity.x = 0;
       player.velocity.y = 0;
       player.inputMove.x = 0;
@@ -352,10 +352,12 @@ export class GameServer {
   }
 
   movePlayerBy(player, dx, dy) {
+    const zoneMinX = player.zoneMinX ?? GAME_CONFIG.arena.playerMinX;
+    const zoneMaxX = player.zoneMaxX ?? GAME_CONFIG.arena.playerMaxX;
     player.position.x = clamp(
       player.position.x + dx,
-      GAME_CONFIG.arena.playerMinX,
-      GAME_CONFIG.arena.playerMaxX
+      zoneMinX,
+      zoneMaxX
     );
     player.position.y = clamp(
       player.position.y + dy,
@@ -647,10 +649,12 @@ export class GameServer {
       player.velocity.x = moveVector.x * player.computedMoveSpeed;
       player.velocity.y = moveVector.y * player.computedMoveSpeed;
 
+      const zoneMinX = player.zoneMinX ?? GAME_CONFIG.arena.playerMinX;
+      const zoneMaxX = player.zoneMaxX ?? GAME_CONFIG.arena.playerMaxX;
       player.position.x = clamp(
         player.position.x + player.velocity.x * dt,
-        GAME_CONFIG.arena.playerMinX,
-        GAME_CONFIG.arena.playerMaxX
+        zoneMinX,
+        zoneMaxX
       );
       player.position.y = clamp(
         player.position.y + player.velocity.y * dt,
@@ -876,7 +880,10 @@ export class GameServer {
       player.botState.moveTimer -= dt;
       if (player.botState.moveTimer <= 0) {
         player.botState.moveTimer = 0.8 + Math.random() * 0.9;
-        player.botState.targetX = 520 + Math.random() * 880;
+        const zoneMinX = player.zoneMinX ?? GAME_CONFIG.arena.playerMinX;
+        const zoneMaxX = player.zoneMaxX ?? GAME_CONFIG.arena.playerMaxX;
+        const zoneW = zoneMaxX - zoneMinX;
+        player.botState.targetX = zoneMinX + Math.random() * zoneW;
         player.botState.targetY = 700 + Math.random() * 220;
       }
 

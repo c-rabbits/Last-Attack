@@ -23,6 +23,12 @@ export const GAME_CONFIG = Object.freeze({
     bossY: 190,
     bossRadius: 170,
   },
+  /** 몬스터 기준 바닥 3구역: [왼쪽, 가운데(내가), 오른쪽] - 각 캐릭터 침범 불가 */
+  playerZones: [
+    { minX: 680, maxX: 1240 },
+    { minX: 120, maxX: 680 },
+    { minX: 1240, maxX: 1800 },
+  ],
 });
 
 export const ROUND_DATA = Object.freeze({
