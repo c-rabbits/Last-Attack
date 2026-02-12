@@ -387,12 +387,57 @@ function safeStorageSet(key, value) {
   }
 }
 
+function isSmallScreen() {
+  return window.innerHeight <= 520 || window.innerWidth <= 700;
+}
+
+const MOBILE_PRESETS = {
+  default: {
+    "--left-stick-left": "max(8px, env(safe-area-inset-left))",
+    "--left-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--right-stick-right": "max(8px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--attack-right": "max(10vmin, calc(env(safe-area-inset-right) + 10vmin))",
+    "--attack-left": "auto",
+    "--attack-bottom": "max(6px, calc(env(safe-area-inset-bottom) + 6px))",
+    "--smite-right": "max(12vmin, calc(env(safe-area-inset-right) + 12vmin))",
+    "--smite-left": "auto",
+    "--smite-bottom": "max(12vmin, calc(env(safe-area-inset-bottom) + 12vmin))",
+    "--skill-right": "max(6vmin, calc(env(safe-area-inset-right) + 6vmin))",
+    "--skill-left": "auto",
+    "--skill-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
+  },
+  lefty: {
+    "--left-stick-left": "auto",
+    "--left-stick-right": "max(8px, env(safe-area-inset-right))",
+    "--left-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--right-stick-left": "max(8px, env(safe-area-inset-left))",
+    "--right-stick-right": "auto",
+    "--right-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--attack-left": "max(10vmin, calc(env(safe-area-inset-left) + 10vmin))",
+    "--attack-right": "auto",
+    "--attack-bottom": "max(6px, calc(env(safe-area-inset-bottom) + 6px))",
+    "--smite-left": "max(12vmin, calc(env(safe-area-inset-left) + 12vmin))",
+    "--smite-right": "auto",
+    "--smite-bottom": "max(12vmin, calc(env(safe-area-inset-bottom) + 12vmin))",
+    "--skill-left": "max(6vmin, calc(env(safe-area-inset-left) + 6vmin))",
+    "--skill-right": "auto",
+    "--skill-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
+  },
+};
+MOBILE_PRESETS.thumb = MOBILE_PRESETS.default;
+MOBILE_PRESETS.compact = MOBILE_PRESETS.default;
+
 function applyControlPreset(presetId) {
-  const preset = CONTROL_PRESETS[presetId] ?? CONTROL_PRESETS.default;
+  const id = presetId in CONTROL_PRESETS ? presetId : "default";
+  const useMobile = isSmallScreen();
+  const preset = useMobile
+    ? (MOBILE_PRESETS[id] ?? MOBILE_PRESETS.default)
+    : (CONTROL_PRESETS[id] ?? CONTROL_PRESETS.default);
   Object.entries(preset).forEach(([cssVar, value]) => {
     document.documentElement.style.setProperty(cssVar, value);
   });
-  controlPresetSelect.value = presetId in CONTROL_PRESETS ? presetId : "default";
+  controlPresetSelect.value = id;
   settingsControlPresetSelect.value = controlPresetSelect.value;
   safeStorageSet("control-preset", controlPresetSelect.value);
 }
@@ -504,21 +549,22 @@ function createVirtualStick(root, thumb, onChange) {
     x: 0,
     y: 0,
   };
-  const radius = 54;
 
   function updateFromEvent(event) {
     const rect = root.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
+    const stickRadiusPx = Math.min(rect.width, rect.height) / 2;
+    const thumbRadiusPx = stickRadiusPx * 0.88;
     let dx = event.clientX - cx;
     let dy = event.clientY - cy;
     const length = Math.hypot(dx, dy);
-    if (length > radius) {
-      dx = (dx / length) * radius;
-      dy = (dy / length) * radius;
+    if (length > thumbRadiusPx) {
+      dx = (dx / length) * thumbRadiusPx;
+      dy = (dy / length) * thumbRadiusPx;
     }
-    state.x = dx / radius;
-    state.y = dy / radius;
+    state.x = length > 0.001 ? dx / thumbRadiusPx : 0;
+    state.y = length > 0.001 ? dy / thumbRadiusPx : 0;
     thumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
     onChange(state.x, state.y, true);
   }
@@ -1522,7 +1568,10 @@ startScreen.classList.remove("hidden");
 pauseScreen.classList.add("hidden");
 settingsModal.classList.add("hidden");
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize", () => {
+  resizeCanvas();
+  applyControlPreset(controlPresetSelect.value);
+});
 
 let previousTime = performance.now();
 function gameLoop(now) {
