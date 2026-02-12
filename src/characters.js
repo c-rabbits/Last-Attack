@@ -94,7 +94,7 @@ class MagicWandCharacter extends CharacterBase {
       server.pushFeed(`${player.name} 마법봉 스택 ${state.wandStacks}`);
     }
 
-    return context.damage + state.wandStacks * 2.2 + player.magic * 0.08;
+    return context.damage + state.wandStacks * 2.2 + player.computedMagic * 0.08;
   }
 
   getBonusStats(player) {
