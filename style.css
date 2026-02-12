@@ -236,28 +236,31 @@ body {
 }
 
 #player-board {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
   gap: 6px;
   position: absolute;
   left: max(8px, env(safe-area-inset-left));
   top: clamp(44px, 8vmin, 60px);
-  max-width: min(420px, 85vw);
+  width: min(160px, 36vw);
+  aspect-ratio: 1;
+  align-content: start;
   pointer-events: auto;
 }
 
 .player-card {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
   min-width: 0;
-  padding: 4px 8px;
+  padding: 4px 6px;
   border-radius: 8px;
   border: 1px solid rgba(178, 206, 255, 0.3);
   background: rgba(6, 13, 24, 0.8);
   color: #d8e7ff;
-  font-size: clamp(9px, 1.6vmin, 11px);
+  font-size: clamp(8px, 1.4vmin, 10px);
   line-height: 1.2;
   backdrop-filter: blur(3px);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -279,12 +282,20 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 3.2em;
+  max-width: 4.5em;
+}
+
+.player-card .player-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .player-card .hp-track {
-  width: 36px;
-  height: 5px;
+  width: 100%;
+  max-width: 48px;
+  height: 4px;
   border-radius: 999px;
   background: rgba(132, 153, 184, 0.5);
   overflow: hidden;
@@ -611,6 +622,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
   margin: 12px 0 8px;
 }
 
@@ -753,9 +765,9 @@ body {
 
 #overlay-message {
   position: absolute;
-  top: 50%;
+  top: clamp(44px, 8vmin, 60px);
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   padding: 12px 16px;
   border-radius: 10px;
   border: 1px solid rgba(165, 196, 244, 0.4);

@@ -99,10 +99,10 @@ const CONTROL_PRESETS = {
     "--right-stick-left": "max(18px, env(safe-area-inset-left))",
     "--right-stick-right": "auto",
     "--right-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
-    "--attack-left": "max(120px, calc(env(safe-area-inset-left) + 120px))",
+    "--attack-left": "max(140px, calc(env(safe-area-inset-left) + 140px))",
     "--attack-right": "auto",
     "--attack-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
-    "--smite-left": "max(140px, calc(env(safe-area-inset-left) + 140px))",
+    "--smite-left": "max(120px, calc(env(safe-area-inset-left) + 120px))",
     "--smite-right": "auto",
     "--smite-bottom": "max(120px, calc(env(safe-area-inset-bottom) + 12vmin))",
     "--skill-left": "max(24px, calc(env(safe-area-inset-left) + 24px))",
@@ -1248,11 +1248,12 @@ function updateHUD(state) {
       const hpPercent = Math.max(0, Math.min(100, (player.hp / player.maxHp) * 100));
       const status = player.alive ? "●" : "○";
       return `<div class="player-card ${player.id === state.localPlayerId ? "me" : ""}">
-        <span class="player-name" style="color:${player.color}">${player.name}</span>
-        <span>${status}</span>
-        <div class="hp-track"><div class="hp-fill" style="width:${hpPercent}%;background:${player.color}"></div></div>
-        <span class="player-stat">★${player.score}</span>
-        <span class="player-stat">🪙${Math.floor(player.gold)}</span>
+        <div class="player-name" style="color:${player.color}">${player.name} ${status}</div>
+        <div class="player-stat-row">
+          <div class="hp-track"><div class="hp-fill" style="width:${hpPercent}%;background:${player.color}"></div></div>
+          <span class="player-stat">★${player.score}</span>
+          <span class="player-stat">🪙${Math.floor(player.gold)}</span>
+        </div>
       </div>`;
     })
     .join("");
