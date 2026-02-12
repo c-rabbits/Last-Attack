@@ -26,11 +26,29 @@ const characterSelect = document.getElementById("character-select");
 const controlPresetSelect = document.getElementById("control-preset-select");
 const renderModeSelect = document.getElementById("render-mode-select");
 const sfxToggleBtn = document.getElementById("sfx-toggle-btn");
+const pauseBtn = document.getElementById("pause-btn");
+const settingsOpenBtn = document.getElementById("settings-open-btn");
 const skillQBtn = document.getElementById("skill-q-btn");
 const skillWBtn = document.getElementById("skill-w-btn");
 const skillEBtn = document.getElementById("skill-e-btn");
 const skillInfoBtn = document.getElementById("skill-info-btn");
 const skillTooltipPanel = document.getElementById("skill-tooltip-panel");
+const startScreen = document.getElementById("start-screen");
+const pauseScreen = document.getElementById("pause-screen");
+const pauseTitle = document.getElementById("pause-title");
+const pauseDesc = document.getElementById("pause-desc");
+const settingsModal = document.getElementById("settings-modal");
+const startGameBtn = document.getElementById("start-game-btn");
+const startSettingsBtn = document.getElementById("start-settings-btn");
+const resumeGameBtn = document.getElementById("resume-game-btn");
+const restartGameBtn = document.getElementById("restart-game-btn");
+const pauseSettingsBtn = document.getElementById("pause-settings-btn");
+const settingsCloseBtn = document.getElementById("settings-close-btn");
+const settingsSfxBtn = document.getElementById("settings-sfx-btn");
+const settingsVolumeSlider = document.getElementById("settings-volume-slider");
+const settingsVibrationBtn = document.getElementById("settings-vibration-btn");
+const settingsControlPresetSelect = document.getElementById("settings-control-preset-select");
+const settingsRenderModeSelect = document.getElementById("settings-render-mode-select");
 
 const skillButtonMap = {
   q: skillQBtn,
@@ -121,10 +139,26 @@ const world = {
   height: GAME_CONFIG.arena.height,
 };
 
-const server = new GameServer();
+let server = new GameServer();
 let pinnedTooltip = false;
 let hoverTooltipSlot = null;
 let previousAudioState = null;
+let latestState = server.getState();
+const gameFlow = {
+  started: false,
+  paused: false,
+  settingsOpen: false,
+};
+const feedbackState = {
+  knownEffects: new Set(),
+};
+const shakeState = {
+  timeLeft: 0,
+  duration: 0,
+  power: 0,
+  x: 0,
+  y: 0,
+};
 
 const inputState = {
   move: { x: 0, y: 0 },
@@ -166,7 +200,8 @@ class SfxEngine {
     this.enabled = safeStorageGet("sfx-enabled", "1") !== "0";
     this.AudioCtor = window.AudioContext || window.webkitAudioContext || null;
     this.ctx = null;
-    this.masterGain = 0.045;
+    this.volumePercent = Number(safeStorageGet("sfx-volume", "45")) || 45;
+    this.masterGain = this.volumePercent / 1000;
   }
 
   ensureContext() {
@@ -185,6 +220,13 @@ class SfxEngine {
   setEnabled(enabled) {
     this.enabled = enabled;
     safeStorageSet("sfx-enabled", enabled ? "1" : "0");
+  }
+
+  setVolume(percent) {
+    const clamped = Math.max(0, Math.min(100, percent));
+    this.volumePercent = clamped;
+    this.masterGain = clamped / 1000;
+    safeStorageSet("sfx-volume", String(Math.round(clamped)));
   }
 
   tone(freq, duration, options = {}) {
@@ -266,6 +308,57 @@ class SfxEngine {
 
 const sfx = new SfxEngine();
 
+class HapticEngine {
+  constructor() {
+    this.enabled = safeStorageGet("vibration-enabled", "1") !== "0";
+    this.lastVibrateAt = 0;
+  }
+
+  setEnabled(enabled) {
+    this.enabled = enabled;
+    safeStorageSet("vibration-enabled", enabled ? "1" : "0");
+  }
+
+  vibrate(pattern, force = false) {
+    if (!this.enabled || !navigator.vibrate) {
+      return;
+    }
+    const now = performance.now();
+    if (!force && now - this.lastVibrateAt < 75) {
+      return;
+    }
+    this.lastVibrateAt = now;
+    navigator.vibrate(pattern);
+  }
+
+  play(eventName) {
+    switch (eventName) {
+      case "hit":
+        this.vibrate(10);
+        break;
+      case "skill":
+        this.vibrate([10, 20, 12]);
+        break;
+      case "smite":
+        this.vibrate([20, 28, 20], true);
+        break;
+      case "heavy":
+        this.vibrate([16, 26, 16], true);
+        break;
+      case "victory":
+        this.vibrate([30, 40, 30, 70, 50], true);
+        break;
+      case "defeat":
+        this.vibrate([24, 60, 24], true);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+const haptics = new HapticEngine();
+
 function normalize(x, y) {
   const len = Math.hypot(x, y);
   if (len <= 0.0001) {
@@ -300,6 +393,7 @@ function applyControlPreset(presetId) {
     document.documentElement.style.setProperty(cssVar, value);
   });
   controlPresetSelect.value = presetId in CONTROL_PRESETS ? presetId : "default";
+  settingsControlPresetSelect.value = controlPresetSelect.value;
   safeStorageSet("control-preset", controlPresetSelect.value);
 }
 
@@ -319,10 +413,61 @@ function applyRenderMode(mode) {
   const allowed = ["auto", "high", "balanced", "low"];
   renderState.mode = allowed.includes(mode) ? mode : "auto";
   renderModeSelect.value = renderState.mode;
+  settingsRenderModeSelect.value = renderState.mode;
   safeStorageSet("render-mode", renderState.mode);
   if (renderState.mode !== "auto") {
     setRenderTier(renderState.mode);
   }
+}
+
+function refreshSettingsUI() {
+  sfxToggleBtn.textContent = sfx.enabled ? "SFX ON" : "SFX OFF";
+  settingsSfxBtn.textContent = sfx.enabled ? "ON" : "OFF";
+  settingsVibrationBtn.textContent = haptics.enabled ? "ON" : "OFF";
+  settingsVolumeSlider.value = String(Math.round(sfx.volumePercent));
+  controlPresetSelect.value = safeStorageGet("control-preset", controlPresetSelect.value);
+  settingsControlPresetSelect.value = controlPresetSelect.value;
+  renderModeSelect.value = renderState.mode;
+  settingsRenderModeSelect.value = renderState.mode;
+}
+
+function showSettings() {
+  gameFlow.settingsOpen = true;
+  settingsModal.classList.remove("hidden");
+  refreshSettingsUI();
+}
+
+function hideSettings() {
+  gameFlow.settingsOpen = false;
+  settingsModal.classList.add("hidden");
+}
+
+function setPaused(paused) {
+  if (!gameFlow.started) {
+    return;
+  }
+  if (latestState.phase === "gameOver" && !paused) {
+    return;
+  }
+  gameFlow.paused = paused;
+  pauseScreen.classList.toggle("hidden", !paused);
+  pauseBtn.textContent = paused ? "계속" : "일시정지";
+}
+
+function restartGame() {
+  server = new GameServer();
+  latestState = server.getState();
+  previousAudioState = null;
+  feedbackState.knownEffects.clear();
+  shakeState.timeLeft = 0;
+  shakeState.power = 0;
+  pinnedTooltip = false;
+  hoverTooltipSlot = null;
+  gameFlow.started = true;
+  gameFlow.paused = false;
+  startScreen.classList.add("hidden");
+  pauseScreen.classList.add("hidden");
+  hideSettings();
 }
 
 function resizeCanvas() {
@@ -332,6 +477,10 @@ function resizeCanvas() {
   canvas.style.width = `${window.innerWidth}px`;
   canvas.style.height = `${window.innerHeight}px`;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+function canAcceptGameplayInput() {
+  return gameFlow.started && !gameFlow.paused && !gameFlow.settingsOpen;
 }
 
 function getProjection() {
@@ -413,7 +562,7 @@ function createVirtualStick(root, thumb, onChange) {
 const leftStickState = createVirtualStick(leftStickEl, leftThumb, (x, y) => {
   inputState.move = normalize(x, y);
 });
-createVirtualStick(rightStickEl, rightThumb, (x, y, active) => {
+const rightStickState = createVirtualStick(rightStickEl, rightThumb, (x, y, active) => {
   const aim = normalize(x, y);
   inputState.manualAim = active && Math.hypot(x, y) > 0.2;
   if (inputState.manualAim) {
@@ -424,6 +573,9 @@ createVirtualStick(rightStickEl, rightThumb, (x, y, active) => {
 });
 
 attackBtn.addEventListener("pointerdown", () => {
+  if (!canAcceptGameplayInput()) {
+    return;
+  }
   sfx.ensureContext();
   inputState.attackPressed = true;
   attackBtn.classList.add("pressed");
@@ -437,6 +589,9 @@ attackBtn.addEventListener("pointercancel", releaseAttack);
 attackBtn.addEventListener("pointerleave", releaseAttack);
 
 smiteBtn.addEventListener("click", () => {
+  if (!canAcceptGameplayInput()) {
+    return;
+  }
   sfx.ensureContext();
   server.queueCommand({
     type: "smite",
@@ -445,6 +600,9 @@ smiteBtn.addEventListener("click", () => {
 });
 
 window.addEventListener("keydown", (event) => {
+  if (!canAcceptGameplayInput() && !["Escape", "Enter"].includes(event.key)) {
+    return;
+  }
   if (event.code === "ArrowUp") {
     keyboard.up = true;
   } else if (event.code === "ArrowDown") {
@@ -467,6 +625,12 @@ window.addEventListener("keydown", (event) => {
       slot,
       playerId: server.localPlayerId,
     });
+  } else if (event.code === "Escape") {
+    if (gameFlow.started) {
+      setPaused(!gameFlow.paused);
+    }
+  } else if (event.code === "Enter" && !gameFlow.started) {
+    startGameBtn.click();
   }
 });
 
@@ -485,6 +649,9 @@ window.addEventListener("keyup", (event) => {
 });
 
 function castSkill(slot) {
+  if (!canAcceptGameplayInput()) {
+    return;
+  }
   sfx.ensureContext();
   server.queueCommand({
     type: "skill",
@@ -529,6 +696,79 @@ sfxToggleBtn.addEventListener("click", () => {
     sfx.ensureContext();
   }
   sfxToggleBtn.textContent = next ? "SFX ON" : "SFX OFF";
+  settingsSfxBtn.textContent = next ? "ON" : "OFF";
+});
+
+settingsOpenBtn.addEventListener("click", () => {
+  showSettings();
+});
+
+pauseBtn.addEventListener("click", () => {
+  setPaused(!gameFlow.paused);
+});
+
+startGameBtn.addEventListener("click", () => {
+  sfx.ensureContext();
+  gameFlow.started = true;
+  setPaused(false);
+  startScreen.classList.add("hidden");
+  hideSettings();
+  previousAudioState = null;
+  sfx.play("round_start");
+});
+
+startSettingsBtn.addEventListener("click", () => {
+  showSettings();
+});
+
+resumeGameBtn.addEventListener("click", () => {
+  setPaused(false);
+});
+
+pauseSettingsBtn.addEventListener("click", () => {
+  showSettings();
+});
+
+restartGameBtn.addEventListener("click", () => {
+  restartGame();
+});
+
+settingsCloseBtn.addEventListener("click", () => {
+  hideSettings();
+});
+
+settingsModal.addEventListener("click", (event) => {
+  if (event.target === settingsModal) {
+    hideSettings();
+  }
+});
+
+settingsSfxBtn.addEventListener("click", () => {
+  const next = !sfx.enabled;
+  sfx.setEnabled(next);
+  refreshSettingsUI();
+});
+
+settingsVibrationBtn.addEventListener("click", () => {
+  const next = !haptics.enabled;
+  haptics.setEnabled(next);
+  refreshSettingsUI();
+  if (next) {
+    haptics.play("hit");
+  }
+});
+
+settingsVolumeSlider.addEventListener("input", () => {
+  const volume = Number(settingsVolumeSlider.value) || 0;
+  sfx.setVolume(volume);
+});
+
+settingsControlPresetSelect.addEventListener("change", () => {
+  applyControlPreset(settingsControlPresetSelect.value);
+});
+
+settingsRenderModeSelect.addEventListener("change", () => {
+  applyRenderMode(settingsRenderModeSelect.value);
 });
 
 window.addEventListener("pointerdown", () => {
@@ -539,6 +779,16 @@ window.addEventListener("keydown", () => {
 });
 
 function applyKeyboardMovement() {
+  if (!canAcceptGameplayInput()) {
+    if (!leftStickState.active) {
+      inputState.move = { x: 0, y: 0 };
+    }
+    if (!attackBtn.classList.contains("pressed")) {
+      inputState.attackPressed = false;
+    }
+    return;
+  }
+
   let x = 0;
   let y = 0;
   if (keyboard.left) {
@@ -568,6 +818,39 @@ function applyKeyboardMovement() {
 }
 
 function maybeSendCommands(dt) {
+  if (!canAcceptGameplayInput()) {
+    const shouldResetMove = transmitCache.move.x !== 0 || transmitCache.move.y !== 0;
+    if (shouldResetMove) {
+      transmitCache.move = { x: 0, y: 0 };
+      server.queueCommand({
+        type: "move",
+        playerId: server.localPlayerId,
+        x: 0,
+        y: 0,
+      });
+    }
+    if (transmitCache.attackPressed) {
+      transmitCache.attackPressed = false;
+      server.queueCommand({
+        type: "attack",
+        playerId: server.localPlayerId,
+        pressed: false,
+      });
+    }
+    if (transmitCache.manualAim || vectorDiff(transmitCache.aim, { x: 0, y: -1 }) > 0.01) {
+      transmitCache.manualAim = false;
+      transmitCache.aim = { x: 0, y: -1 };
+      server.queueCommand({
+        type: "aim",
+        playerId: server.localPlayerId,
+        x: 0,
+        y: -1,
+        manual: false,
+      });
+    }
+    return;
+  }
+
   transmitCache.timer -= dt;
   if (transmitCache.timer > 0) {
     return;
@@ -750,15 +1033,23 @@ function handleSoundTriggers(state, localPlayer) {
     } else if (next.phase === "battle") {
       sfx.play("round_start");
     } else if (next.phase === "gameOver") {
-      sfx.play(next.winnerId === state.localPlayerId ? "victory" : "defeat");
+      if (next.winnerId === state.localPlayerId) {
+        sfx.play("victory");
+        haptics.play("victory");
+      } else {
+        sfx.play("defeat");
+        haptics.play("defeat");
+      }
     }
   }
 
   if (!previousAudioState.bossFrenzy && next.bossFrenzy) {
     sfx.play("frenzy");
+    haptics.play("heavy");
   }
   if (previousAudioState.bossHp > 0 && next.bossHp <= 0) {
     sfx.play("boss_down");
+    haptics.play("heavy");
   }
   if (!previousAudioState.localSmiteUsed && next.localSmiteUsed && next.phase === "battle") {
     sfx.play("smite");
@@ -805,9 +1096,93 @@ function autoTuneRender(realDt) {
   }
 }
 
+function triggerShake(power, duration = 0.12) {
+  const safePower = Math.max(0, power);
+  if (safePower <= 0) {
+    return;
+  }
+  shakeState.power = Math.max(shakeState.power, safePower);
+  shakeState.duration = Math.max(shakeState.duration, duration);
+  shakeState.timeLeft = Math.max(shakeState.timeLeft, duration);
+}
+
+function updateShake(dt) {
+  if (shakeState.timeLeft <= 0) {
+    shakeState.x = 0;
+    shakeState.y = 0;
+    return;
+  }
+  shakeState.timeLeft = Math.max(0, shakeState.timeLeft - dt);
+  const progress = shakeState.timeLeft / Math.max(0.0001, shakeState.duration);
+  const amp = shakeState.power * progress * progress;
+  shakeState.x = (Math.random() * 2 - 1) * amp;
+  shakeState.y = (Math.random() * 2 - 1) * amp;
+}
+
+function processCombatFeedback(state) {
+  const effects = state.effects ?? [];
+  const localId = state.localPlayerId;
+  for (const effect of effects) {
+    if (!effect?.id || feedbackState.knownEffects.has(effect.id)) {
+      continue;
+    }
+    feedbackState.knownEffects.add(effect.id);
+
+    if (effect.kind === "bossHit") {
+      const amount = Number(effect.amount) || 0;
+      const isLocal = effect.playerId === localId;
+      const base = 0.8 + Math.min(5.1, amount / 320);
+      if (effect.source === "smite") {
+        triggerShake(base + 2.4, 0.24);
+      } else if (isLocal) {
+        triggerShake(base, 0.1);
+      } else {
+        triggerShake(Math.min(0.6, base * 0.2), 0.06);
+      }
+      if (effect.source === "smite") {
+        haptics.play("smite");
+      } else if (isLocal && amount > 420) {
+        haptics.play("heavy");
+      } else if (isLocal) {
+        haptics.play("hit");
+      }
+    } else if (effect.kind === "skillShot") {
+      triggerShake(3.3, 0.12);
+      haptics.play("skill");
+    } else if (effect.kind === "smiteCast") {
+      triggerShake(8.4, 0.25);
+      haptics.play("smite");
+    } else if (effect.kind === "playerHit" && effect.playerId === state.localPlayerId) {
+      const amount = Number(effect.amount) || 0;
+      triggerShake(1.5 + Math.min(3.2, amount / 120), 0.1);
+      haptics.play(amount > 140 ? "heavy" : "hit");
+    }
+  }
+
+  if (feedbackState.knownEffects.size > 2000) {
+    const recent = effects.slice(-260).map((entry) => entry.id).filter(Boolean);
+    feedbackState.knownEffects.clear();
+    recent.forEach((id) => feedbackState.knownEffects.add(id));
+  }
+}
+
 function updateHUD(state) {
   const localPlayer = state.players.find((player) => player.id === state.localPlayerId);
   const winner = state.players.find((player) => player.id === state.winnerId);
+  const controlsLocked = !gameFlow.started || gameFlow.paused || gameFlow.settingsOpen;
+
+  leftStickEl.style.pointerEvents = controlsLocked ? "none" : "auto";
+  rightStickEl.style.pointerEvents = controlsLocked ? "none" : "auto";
+  if (controlsLocked) {
+    inputState.move = { x: 0, y: 0 };
+    inputState.manualAim = false;
+    leftStickState.active = false;
+    leftStickState.pointerId = null;
+    rightStickState.active = false;
+    rightStickState.pointerId = null;
+    leftThumb.style.transform = "translate(-50%, -50%)";
+    rightThumb.style.transform = "translate(-50%, -50%)";
+  }
 
   roundLabel.textContent = `R${state.round} / ${state.config.maxRounds}`;
   const phaseText =
@@ -844,8 +1219,9 @@ function updateHUD(state) {
   } else {
     smiteBtn.classList.remove("used");
   }
-  smiteBtn.disabled = !localPlayer || state.phase !== "battle" || !localPlayer.alive || localPlayer.smiteUsed;
-  attackBtn.disabled = !localPlayer || state.phase !== "battle" || !localPlayer.alive;
+  smiteBtn.disabled =
+    controlsLocked || !localPlayer || state.phase !== "battle" || !localPlayer.alive || localPlayer.smiteUsed;
+  attackBtn.disabled = controlsLocked || !localPlayer || state.phase !== "battle" || !localPlayer.alive;
 
   for (const slot of skillSlots) {
     const button = skillButtonMap[slot];
@@ -853,7 +1229,7 @@ function updateHUD(state) {
     if (!button || !skill) {
       continue;
     }
-    const ready = skill.remaining <= 0 && state.phase === "battle" && localPlayer.alive;
+    const ready = !controlsLocked && skill.remaining <= 0 && state.phase === "battle" && localPlayer.alive;
     button.disabled = !ready;
     button.classList.toggle("cooldown", !ready);
     const subText = skill.remaining > 0 ? `${skill.remaining.toFixed(1)}s` : "READY";
@@ -870,15 +1246,21 @@ function updateHUD(state) {
     skillTooltipPanel.classList.add("hidden");
     skillInfoBtn.textContent = "?";
   }
+  if (gameFlow.settingsOpen) {
+    skillTooltipPanel.classList.add("hidden");
+  }
 
   if (localPlayer && characterSelect.value !== localPlayer.characterId) {
     characterSelect.value = localPlayer.characterId;
   }
   characterSelect.disabled = !(state.phase === "shop" || (state.round === 1 && state.serverTime < 4));
+  pauseBtn.disabled = !gameFlow.started || gameFlow.settingsOpen;
 
   updateShopUI(state, localPlayer);
 
-  if (state.phase === "gameOver" && winner) {
+  if (!gameFlow.started || gameFlow.paused || gameFlow.settingsOpen) {
+    overlayMessage.classList.remove("visible");
+  } else if (state.phase === "gameOver" && winner) {
     overlayMessage.classList.add("visible");
     overlayMessage.textContent = `${winner.name} 승리 · ${state.winnerReason}`;
   } else if (state.phase === "shop") {
@@ -886,6 +1268,19 @@ function updateHUD(state) {
     overlayMessage.textContent = `라운드 ${state.round} 종료 · 상점 준비`;
   } else {
     overlayMessage.classList.remove("visible");
+  }
+
+  if (state.phase === "gameOver" && winner) {
+    pauseTitle.textContent = "게임 종료";
+    pauseDesc.textContent = `${winner.name} 승리 · ${state.winnerReason}`;
+    resumeGameBtn.classList.add("hidden");
+    if (!gameFlow.paused && !gameFlow.settingsOpen) {
+      setPaused(true);
+    }
+  } else {
+    pauseTitle.textContent = "일시정지";
+    pauseDesc.textContent = "전투를 잠시 멈췄습니다.";
+    resumeGameBtn.classList.remove("hidden");
   }
 }
 
@@ -1069,6 +1464,27 @@ function drawEffects(state, projection) {
       ctx.beginPath();
       ctx.arc(center.x, center.y, projection.scale * (25 + (1 - alpha) * 45), 0, Math.PI * 2);
       ctx.stroke();
+    } else if (effect.kind === "bossHit" && effect.to) {
+      const center = project(effect.to.x, effect.to.y, projection);
+      const alpha = Math.max(0, effect.ttl / 0.16);
+      const power = Math.min(1.6, (effect.amount ?? 0) / 650 + 0.55);
+      ctx.fillStyle = `rgba(255, 245, 210, ${0.26 * alpha})`;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, projection.scale * (26 + (1 - alpha) * 90 * power), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = effect.color ?? "rgba(255,255,255,0.5)";
+      ctx.lineWidth = Math.max(2, projection.scale * 4.5);
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, projection.scale * (20 + (1 - alpha) * 65 * power), 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (effect.kind === "playerHit" && effect.to) {
+      const center = project(effect.to.x, effect.to.y, projection);
+      const alpha = Math.max(0, effect.ttl / 0.14);
+      ctx.strokeStyle = `rgba(255, 160, 160, ${0.7 * alpha})`;
+      ctx.lineWidth = Math.max(2, projection.scale * 3.2);
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, projection.scale * (22 + (1 - alpha) * 20), 0, Math.PI * 2);
+      ctx.stroke();
     }
   });
 }
@@ -1076,10 +1492,13 @@ function drawEffects(state, projection) {
 function render(state, nowSec) {
   const projection = getProjection();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(shakeState.x, shakeState.y);
   drawBackground(projection, nowSec);
   drawBoss(state, projection);
   drawEffects(state, projection);
   drawPlayers(state, projection);
+  ctx.restore();
 
   if (state.phase === "gameOver") {
     ctx.fillStyle = "rgba(4, 8, 14, 0.35)";
@@ -1098,7 +1517,10 @@ if (renderState.mode === "auto") {
   setRenderTier("high");
 }
 
-sfxToggleBtn.textContent = sfx.enabled ? "SFX ON" : "SFX OFF";
+refreshSettingsUI();
+startScreen.classList.remove("hidden");
+pauseScreen.classList.add("hidden");
+settingsModal.classList.add("hidden");
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
@@ -1111,13 +1533,17 @@ function gameLoop(now) {
 
   applyKeyboardMovement();
   maybeSendCommands(dt);
-  server.update(dt);
-  const state = server.getState();
-  const localPlayer = state.players.find((player) => player.id === state.localPlayerId);
-  handleSoundTriggers(state, localPlayer);
+  if (gameFlow.started && !gameFlow.paused && !gameFlow.settingsOpen) {
+    server.update(dt);
+    latestState = server.getState();
+    const localPlayer = latestState.players.find((player) => player.id === latestState.localPlayerId);
+    handleSoundTriggers(latestState, localPlayer);
+    processCombatFeedback(latestState);
+  }
+  updateShake(dt);
 
-  updateHUD(state);
-  render(state, now / 1000);
+  updateHUD(latestState);
+  render(latestState, now / 1000);
 
   if (!keyboard.attack) {
     inputState.attackPressed = attackBtn.classList.contains("pressed");

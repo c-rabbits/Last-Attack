@@ -127,6 +127,7 @@ export class GameServer {
     this.commandQueue = [];
     this.feedCounter = 0;
     this.feed = [];
+    this.effectCounter = 0;
     this.effects = [];
     this.phase = "battle";
     this.round = 1;
@@ -159,6 +160,16 @@ export class GameServer {
     });
     if (this.feed.length > 9) {
       this.feed.length = 9;
+    }
+  }
+
+  addEffect(effect) {
+    this.effects.push({
+      id: ++this.effectCounter,
+      ...effect,
+    });
+    if (this.effects.length > 180) {
+      this.effects.splice(0, this.effects.length - 180);
     }
   }
 
@@ -354,7 +365,7 @@ export class GameServer {
   }
 
   spawnSkillEffect(player, color = player.color) {
-    this.effects.push({
+    this.addEffect({
       kind: "skillBurst",
       ttl: 0.28,
       from: { ...player.position },
@@ -367,7 +378,7 @@ export class GameServer {
       return;
     }
     this.applyDamageToBoss(player, amount, "skill", this.commandCounter + 1);
-    this.effects.push({
+    this.addEffect({
       kind: "skillShot",
       ttl: 0.2,
       from: { ...player.position },
@@ -521,7 +532,7 @@ export class GameServer {
     }
 
     player.smiteUsed = true;
-    this.effects.push({
+    this.addEffect({
       kind: "smiteCast",
       ttl: 0.45,
       from: { ...player.position },
@@ -546,6 +557,16 @@ export class GameServer {
     this.boss.hp = Math.max(0, this.boss.hp - dealt);
     this.roundDamage[player.id] += dealt;
     player.damageDoneThisRound += dealt;
+
+    this.addEffect({
+      kind: "bossHit",
+      ttl: 0.16,
+      to: { x: GAME_CONFIG.arena.bossX, y: GAME_CONFIG.arena.bossY + 18 },
+      playerId: player.id,
+      amount: dealt,
+      source,
+      color: player.color,
+    });
 
     if (this.boss.hp <= 0.0001) {
       this.boss.hp = 0;
@@ -672,7 +693,7 @@ export class GameServer {
       this
     );
     this.applyDamageToBoss(player, damage, "normal", this.commandCounter + 1);
-    this.effects.push({
+    this.addEffect({
       kind: "shot",
       ttl: 0.12,
       from: { ...player.position },
@@ -720,6 +741,14 @@ export class GameServer {
       return;
     }
     player.hp -= damage;
+    this.addEffect({
+      kind: "playerHit",
+      ttl: 0.14,
+      to: { ...player.position },
+      playerId: player.id,
+      amount: damage,
+      color: player.color,
+    });
     if (player.hp <= 0) {
       player.hp = 0;
       player.alive = false;

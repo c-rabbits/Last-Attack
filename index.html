@@ -41,6 +41,8 @@
             </select>
           </label>
           <button id="sfx-toggle-btn" class="pill pill-button">SFX ON</button>
+          <button id="pause-btn" class="pill pill-button">일시정지</button>
+          <button id="settings-open-btn" class="pill pill-button">설정</button>
         </div>
 
         <div id="player-board"></div>
@@ -80,6 +82,72 @@
       <div id="skill-tooltip-panel" class="hidden"></div>
 
       <div id="overlay-message"></div>
+
+      <div id="start-screen" class="modal-overlay">
+        <div class="modal-card">
+          <h1>Last Attack</h1>
+          <p>8라운드 안에 강타와 막타 경쟁으로 3점을 먼저 달성하세요.</p>
+          <div class="modal-row">
+            <button id="start-game-btn" class="modal-btn primary">게임 시작</button>
+            <button id="start-settings-btn" class="modal-btn">설정</button>
+          </div>
+          <small>모바일은 가로 화면으로 플레이하세요.</small>
+        </div>
+      </div>
+
+      <div id="pause-screen" class="modal-overlay hidden">
+        <div class="modal-card">
+          <h2 id="pause-title">일시정지</h2>
+          <p id="pause-desc">전투를 잠시 멈췄습니다.</p>
+          <div class="modal-row">
+            <button id="resume-game-btn" class="modal-btn primary">계속하기</button>
+            <button id="pause-settings-btn" class="modal-btn">설정</button>
+            <button id="restart-game-btn" class="modal-btn danger">재시작</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card wide">
+          <h2>설정</h2>
+          <div class="settings-grid">
+            <label class="setting-item">
+              <span>사운드</span>
+              <button id="settings-sfx-btn" class="pill pill-button">ON</button>
+            </label>
+            <label class="setting-item">
+              <span>사운드 볼륨</span>
+              <input id="settings-volume-slider" type="range" min="0" max="100" value="45" />
+            </label>
+            <label class="setting-item">
+              <span>진동</span>
+              <button id="settings-vibration-btn" class="pill pill-button">ON</button>
+            </label>
+            <label class="setting-item">
+              <span>버튼 프리셋</span>
+              <select id="settings-control-preset-select">
+                <option value="default">기본</option>
+                <option value="thumb">엄지 집중</option>
+                <option value="lefty">왼손잡이</option>
+                <option value="compact">컴팩트</option>
+              </select>
+            </label>
+            <label class="setting-item">
+              <span>렌더 모드</span>
+              <select id="settings-render-mode-select">
+                <option value="auto">AUTO</option>
+                <option value="high">HIGH</option>
+                <option value="balanced">BALANCED</option>
+                <option value="low">LOW</option>
+              </select>
+            </label>
+          </div>
+          <div class="modal-row">
+            <button id="settings-close-btn" class="modal-btn primary">닫기</button>
+          </div>
+        </div>
+      </div>
+
       <div id="rotate-warning">가로 화면으로 플레이해 주세요.</div>
     </div>
 

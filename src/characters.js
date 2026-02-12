@@ -106,9 +106,9 @@ class StateShiftCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "돌격 개시", cooldown: 12, icon: "RUSH", description: "공격 태세 고정, 공속 증가" },
+      q: { name: "돌격 개시", cooldown: 13, icon: "RUSH", description: "공격 태세 고정, 공속 증가" },
       w: { name: "철벽 진형", cooldown: 14, icon: "GUARD", description: "수비 태세 고정, 즉시 회복" },
-      e: { name: "태세 파쇄", cooldown: 20, icon: "BREAK", description: "현재 태세 기반 강타 스킬" },
+      e: { name: "태세 파쇄", cooldown: 21, icon: "BREAK", description: "현재 태세 기반 강타 스킬" },
     };
   }
 
@@ -139,8 +139,8 @@ class StateShiftCharacter extends CharacterBase {
       const mode = state.lockMode ?? state.mode;
       const damage =
         mode === "assault"
-          ? player.computedAtk * 2.2 + player.computedMagic * 0.8
-          : player.computedAtk * 1.4 + player.computedArmor * 6.2;
+          ? player.computedAtk * 1.95 + player.computedMagic * 0.72
+          : player.computedAtk * 1.3 + player.computedArmor * 5.3;
       server.dealSkillDamage(player, damage, "태세 파쇄");
       server.pushFeed(`${player.name} E: 태세 파쇄`);
       return true;
@@ -193,9 +193,9 @@ class MagicWandCharacter extends CharacterBase {
 
   getSkillDefinitions() {
     return {
-      q: { name: "비전 탄막", cooldown: 10, icon: "ARC", description: "다중 탄막으로 강한 누적 피해" },
-      w: { name: "마력 응축", cooldown: 16, icon: "MANA", description: "스택 획득, 공속 강화, 회복" },
-      e: { name: "오버차지 폭발", cooldown: 22, icon: "BLAST", description: "스택 소모 폭발 피해" },
+      q: { name: "비전 탄막", cooldown: 11, icon: "ARC", description: "다중 탄막으로 강한 누적 피해" },
+      w: { name: "마력 응축", cooldown: 15, icon: "MANA", description: "스택 획득, 공속 강화, 회복" },
+      e: { name: "오버차지 폭발", cooldown: 23, icon: "BLAST", description: "스택 소모 폭발 피해" },
     };
   }
 
@@ -203,7 +203,7 @@ class MagicWandCharacter extends CharacterBase {
     const state = player.characterState;
     if (slot === "q") {
       const stacks = state.wandStacks ?? 0;
-      const perHit = player.computedAtk * 0.35 + player.computedMagic * 0.52 + stacks * 1.4;
+      const perHit = player.computedAtk * 0.35 + player.computedMagic * 0.47 + stacks * 1.3;
       const damage = perHit * 4;
       server.dealSkillDamage(player, damage, "비전 탄막");
       server.pushFeed(`${player.name} Q: 비전 탄막`);
@@ -222,7 +222,7 @@ class MagicWandCharacter extends CharacterBase {
     if (slot === "e") {
       const consumed = state.wandStacks ?? 0;
       state.wandStacks = 0;
-      const damage = player.computedMagic * 1.1 + consumed * 48;
+      const damage = player.computedMagic * 1.0 + consumed * 40;
       server.dealSkillDamage(player, damage, "오버차지 폭발");
       server.pushFeed(`${player.name} E: 오버차지 폭발 (${consumed}스택 소모)`);
       return true;
@@ -271,8 +271,8 @@ class BoomerangCharacter extends CharacterBase {
   getSkillDefinitions() {
     return {
       q: { name: "리턴 부메랑", cooldown: 11, icon: "RETURN", description: "왕복 2타를 즉시 판정" },
-      w: { name: "수렵 본능", cooldown: 15, icon: "HUNT", description: "이속/공속 강화 및 소량 회복" },
-      e: { name: "승점 각성", cooldown: 24, icon: "SCORE", description: "점수 비례 마무리 스킬" },
+      w: { name: "수렵 본능", cooldown: 14, icon: "HUNT", description: "이속/공속 강화 및 소량 회복" },
+      e: { name: "승점 각성", cooldown: 25, icon: "SCORE", description: "점수 비례 마무리 스킬" },
     };
   }
 
@@ -295,7 +295,7 @@ class BoomerangCharacter extends CharacterBase {
     }
 
     if (slot === "e") {
-      const damage = player.computedAtk * 1.3 + player.score * 160 + scale * 95;
+      const damage = player.computedAtk * 1.18 + player.score * 130 + scale * 80;
       server.dealSkillDamage(player, damage, "승점 각성");
       server.pushFeed(`${player.name} E: 승점 각성`);
       return true;
@@ -330,14 +330,14 @@ class BowCharacter extends CharacterBase {
     return {
       q: { name: "관통 화살", cooldown: 9, icon: "PIERCE", description: "공속 비례 단일 강타" },
       w: { name: "집중 사격", cooldown: 14, icon: "FOCUS", description: "다음 평타 5회 강화" },
-      e: { name: "폭우 사격", cooldown: 20, icon: "BARRAGE", description: "다단 히트 난사" },
+      e: { name: "폭우 사격", cooldown: 21, icon: "BARRAGE", description: "다단 히트 난사" },
     };
   }
 
   castSkill(slot, player, server) {
     const state = player.characterState;
     if (slot === "q") {
-      const damage = player.computedAtk + player.computedAttackSpeed * 115;
+      const damage = player.computedAtk + player.computedAttackSpeed * 104;
       server.dealSkillDamage(player, damage, "관통 화살");
       server.pushFeed(`${player.name} Q: 관통 화살`);
       return true;
@@ -352,7 +352,7 @@ class BowCharacter extends CharacterBase {
 
     if (slot === "e") {
       const perHit = player.computedAtk * 0.45 + player.computedAttackSpeed * 28;
-      server.dealSkillDamage(player, perHit * 6, "폭우 사격");
+      server.dealSkillDamage(player, perHit * 5, "폭우 사격");
       server.pushFeed(`${player.name} E: 폭우 사격`);
       return true;
     }
@@ -420,7 +420,7 @@ class CrossbowCharacter extends CharacterBase {
     return {
       q: { name: "리듬 브레이크", cooldown: 8, icon: "RHYTHM", description: "리듬 성공 시 큰 피해" },
       w: { name: "기동 재장전", cooldown: 13, icon: "DASH", description: "재장전 초기화 + 기동 강화" },
-      e: { name: "전환 포격", cooldown: 21, icon: "SIEGE", description: "이동 에너지 소모 포격" },
+      e: { name: "전환 포격", cooldown: 22, icon: "SIEGE", description: "이동 에너지 소모 포격" },
     };
   }
 
@@ -429,7 +429,7 @@ class CrossbowCharacter extends CharacterBase {
     if (slot === "q") {
       const perfect = state.crossbowBeat === 2;
       const damage =
-        player.computedAtk * (perfect ? 2.2 : 1.2) + state.momentum * (perfect ? 140 : 90);
+        player.computedAtk * (perfect ? 2.0 : 1.1) + state.momentum * (perfect ? 130 : 80);
       state.crossbowBeat = 0;
       server.dealSkillDamage(player, damage, "리듬 브레이크");
       server.pushFeed(`${player.name} Q: 리듬 브레이크${perfect ? " (퍼펙트)" : ""}`);
@@ -448,7 +448,7 @@ class CrossbowCharacter extends CharacterBase {
 
     if (slot === "e") {
       const momentum = state.momentum ?? 0;
-      const damage = player.computedAtk * 1.2 + momentum * 220 + player.computedMoveSpeed * 0.25;
+      const damage = player.computedAtk * 1.15 + momentum * 190 + player.computedMoveSpeed * 0.2;
       state.momentum *= 0.4;
       state.bastionTimer = 4;
       server.dealSkillDamage(player, damage, "전환 포격");
