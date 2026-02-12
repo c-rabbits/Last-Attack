@@ -61,70 +61,70 @@ const CONTROL_PRESETS = {
   default: {
     "--left-stick-left": "max(18px, env(safe-area-inset-left))",
     "--left-stick-right": "auto",
-    "--left-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--left-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--right-stick-left": "auto",
     "--right-stick-right": "max(18px, env(safe-area-inset-right))",
-    "--right-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--right-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--attack-left": "auto",
     "--attack-right": "max(195px, calc(env(safe-area-inset-right) + 195px))",
-    "--attack-bottom": "max(24px, calc(env(safe-area-inset-bottom) + 24px))",
+    "--attack-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--smite-left": "auto",
     "--smite-right": "max(220px, calc(env(safe-area-inset-right) + 220px))",
-    "--smite-bottom": "max(148px, calc(env(safe-area-inset-bottom) + 148px))",
+    "--smite-bottom": "max(130px, calc(env(safe-area-inset-bottom) + 130px))",
     "--skill-left": "auto",
     "--skill-right": "max(96px, calc(env(safe-area-inset-right) + 96px))",
-    "--skill-bottom": "max(248px, calc(env(safe-area-inset-bottom) + 248px))",
+    "--skill-bottom": "max(222px, calc(env(safe-area-inset-bottom) + 222px))",
   },
   thumb: {
     "--left-stick-left": "max(14px, env(safe-area-inset-left))",
     "--left-stick-right": "auto",
-    "--left-stick-bottom": "max(14px, env(safe-area-inset-bottom))",
+    "--left-stick-bottom": "max(18px, 4vmin, calc(env(safe-area-inset-bottom) + 18px))",
     "--right-stick-left": "auto",
     "--right-stick-right": "max(10px, env(safe-area-inset-right))",
-    "--right-stick-bottom": "max(10px, env(safe-area-inset-bottom))",
+    "--right-stick-bottom": "max(18px, 4vmin, calc(env(safe-area-inset-bottom) + 18px))",
     "--attack-left": "auto",
     "--attack-right": "max(136px, calc(env(safe-area-inset-right) + 136px))",
-    "--attack-bottom": "max(12px, calc(env(safe-area-inset-bottom) + 12px))",
+    "--attack-bottom": "max(18px, 4vmin, calc(env(safe-area-inset-bottom) + 18px))",
     "--smite-left": "auto",
     "--smite-right": "max(140px, calc(env(safe-area-inset-right) + 140px))",
-    "--smite-bottom": "max(126px, calc(env(safe-area-inset-bottom) + 126px))",
+    "--smite-bottom": "max(118px, calc(env(safe-area-inset-bottom) + 118px))",
     "--skill-left": "auto",
     "--skill-right": "max(32px, calc(env(safe-area-inset-right) + 32px))",
-    "--skill-bottom": "max(208px, calc(env(safe-area-inset-bottom) + 208px))",
+    "--skill-bottom": "max(200px, calc(env(safe-area-inset-bottom) + 200px))",
   },
   lefty: {
     "--left-stick-left": "auto",
     "--left-stick-right": "max(18px, env(safe-area-inset-right))",
-    "--left-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--left-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--right-stick-left": "max(18px, env(safe-area-inset-left))",
     "--right-stick-right": "auto",
-    "--right-stick-bottom": "max(18px, env(safe-area-inset-bottom))",
+    "--right-stick-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--attack-left": "max(195px, calc(env(safe-area-inset-left) + 195px))",
     "--attack-right": "auto",
-    "--attack-bottom": "max(24px, calc(env(safe-area-inset-bottom) + 24px))",
+    "--attack-bottom": "max(20px, 4vmin, calc(env(safe-area-inset-bottom) + 20px))",
     "--smite-left": "max(220px, calc(env(safe-area-inset-left) + 220px))",
     "--smite-right": "auto",
-    "--smite-bottom": "max(148px, calc(env(safe-area-inset-bottom) + 148px))",
+    "--smite-bottom": "max(130px, calc(env(safe-area-inset-bottom) + 130px))",
     "--skill-left": "max(96px, calc(env(safe-area-inset-left) + 96px))",
     "--skill-right": "auto",
-    "--skill-bottom": "max(248px, calc(env(safe-area-inset-bottom) + 248px))",
+    "--skill-bottom": "max(222px, calc(env(safe-area-inset-bottom) + 222px))",
   },
   compact: {
-    "--left-stick-left": "max(8px, env(safe-area-inset-left))",
+    "--left-stick-left": "max(10px, env(safe-area-inset-left))",
     "--left-stick-right": "auto",
-    "--left-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--left-stick-bottom": "max(16px, 3vmin, calc(env(safe-area-inset-bottom) + 16px))",
     "--right-stick-left": "auto",
-    "--right-stick-right": "max(8px, env(safe-area-inset-right))",
-    "--right-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--right-stick-right": "max(10px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(16px, 3vmin, calc(env(safe-area-inset-bottom) + 16px))",
     "--attack-left": "auto",
     "--attack-right": "max(132px, calc(env(safe-area-inset-right) + 132px))",
-    "--attack-bottom": "max(10px, calc(env(safe-area-inset-bottom) + 10px))",
+    "--attack-bottom": "max(16px, 3vmin, calc(env(safe-area-inset-bottom) + 16px))",
     "--smite-left": "auto",
     "--smite-right": "max(148px, calc(env(safe-area-inset-right) + 148px))",
-    "--smite-bottom": "max(118px, calc(env(safe-area-inset-bottom) + 118px))",
+    "--smite-bottom": "max(108px, calc(env(safe-area-inset-bottom) + 108px))",
     "--skill-left": "auto",
     "--skill-right": "max(24px, calc(env(safe-area-inset-right) + 24px))",
-    "--skill-bottom": "max(194px, calc(env(safe-area-inset-bottom) + 194px))",
+    "--skill-bottom": "max(186px, calc(env(safe-area-inset-bottom) + 186px))",
   },
 };
 
@@ -393,36 +393,36 @@ function isSmallScreen() {
 
 const MOBILE_PRESETS = {
   default: {
-    "--left-stick-left": "max(8px, env(safe-area-inset-left))",
-    "--left-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
-    "--right-stick-right": "max(8px, env(safe-area-inset-right))",
-    "--right-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--left-stick-left": "max(10px, env(safe-area-inset-left))",
+    "--left-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
+    "--right-stick-right": "max(10px, env(safe-area-inset-right))",
+    "--right-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
     "--attack-right": "max(10vmin, calc(env(safe-area-inset-right) + 10vmin))",
     "--attack-left": "auto",
-    "--attack-bottom": "max(6px, calc(env(safe-area-inset-bottom) + 6px))",
+    "--attack-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
     "--smite-right": "max(12vmin, calc(env(safe-area-inset-right) + 12vmin))",
     "--smite-left": "auto",
-    "--smite-bottom": "max(12vmin, calc(env(safe-area-inset-bottom) + 12vmin))",
+    "--smite-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
     "--skill-right": "max(6vmin, calc(env(safe-area-inset-right) + 6vmin))",
     "--skill-left": "auto",
-    "--skill-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
+    "--skill-bottom": "max(30vmin, calc(env(safe-area-inset-bottom) + 30vmin))",
   },
   lefty: {
     "--left-stick-left": "auto",
-    "--left-stick-right": "max(8px, env(safe-area-inset-right))",
-    "--left-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
-    "--right-stick-left": "max(8px, env(safe-area-inset-left))",
+    "--left-stick-right": "max(10px, env(safe-area-inset-right))",
+    "--left-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
+    "--right-stick-left": "max(10px, env(safe-area-inset-left))",
     "--right-stick-right": "auto",
-    "--right-stick-bottom": "max(8px, env(safe-area-inset-bottom))",
+    "--right-stick-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
     "--attack-left": "max(10vmin, calc(env(safe-area-inset-left) + 10vmin))",
     "--attack-right": "auto",
-    "--attack-bottom": "max(6px, calc(env(safe-area-inset-bottom) + 6px))",
+    "--attack-bottom": "max(14px, 4vmin, calc(env(safe-area-inset-bottom) + 14px))",
     "--smite-left": "max(12vmin, calc(env(safe-area-inset-left) + 12vmin))",
     "--smite-right": "auto",
-    "--smite-bottom": "max(12vmin, calc(env(safe-area-inset-bottom) + 12vmin))",
+    "--smite-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
     "--skill-left": "max(6vmin, calc(env(safe-area-inset-left) + 6vmin))",
     "--skill-right": "auto",
-    "--skill-bottom": "max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin))",
+    "--skill-bottom": "max(30vmin, calc(env(safe-area-inset-bottom) + 30vmin))",
   },
 };
 MOBILE_PRESETS.thumb = MOBILE_PRESETS.default;
@@ -753,8 +753,22 @@ pauseBtn.addEventListener("click", () => {
   setPaused(!gameFlow.paused);
 });
 
+function requestFullscreen() {
+  const el = document.documentElement;
+  const fn =
+    el.requestFullscreen ||
+    el.webkitRequestFullscreen ||
+    el.webkitRequestFullScreen ||
+    el.mozRequestFullScreen ||
+    el.msRequestFullscreen;
+  if (typeof fn === "function") {
+    fn.call(el).catch(() => {});
+  }
+}
+
 startGameBtn.addEventListener("click", () => {
   sfx.ensureContext();
+  requestFullscreen();
   gameFlow.started = true;
   setPaused(false);
   startScreen.classList.add("hidden");

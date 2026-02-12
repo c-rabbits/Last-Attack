@@ -1,21 +1,22 @@
 :root {
   color-scheme: dark;
   font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+  --ctrl-margin: max(16px, 4vmin, env(safe-area-inset-bottom));
   --left-stick-left: max(18px, env(safe-area-inset-left));
   --left-stick-right: auto;
-  --left-stick-bottom: max(18px, env(safe-area-inset-bottom));
+  --left-stick-bottom: var(--ctrl-margin);
   --right-stick-left: auto;
   --right-stick-right: max(18px, env(safe-area-inset-right));
-  --right-stick-bottom: max(18px, env(safe-area-inset-bottom));
+  --right-stick-bottom: var(--ctrl-margin);
   --attack-left: auto;
   --attack-right: max(195px, calc(env(safe-area-inset-right) + 195px));
-  --attack-bottom: max(24px, calc(env(safe-area-inset-bottom) + 24px));
+  --attack-bottom: var(--ctrl-margin);
   --smite-left: auto;
   --smite-right: max(220px, calc(env(safe-area-inset-right) + 220px));
-  --smite-bottom: max(148px, calc(env(safe-area-inset-bottom) + 148px));
+  --smite-bottom: calc(var(--ctrl-margin) + 14vmin);
   --skill-left: auto;
   --skill-right: max(96px, calc(env(safe-area-inset-right) + 96px));
-  --skill-bottom: max(248px, calc(env(safe-area-inset-bottom) + 248px));
+  --skill-bottom: calc(var(--ctrl-margin) + 26vmin);
 }
 
 * {
@@ -205,8 +206,8 @@ body {
 
 .stick {
   position: absolute;
-  width: clamp(80px, 18vmin, 150px);
-  height: clamp(80px, 18vmin, 150px);
+  width: clamp(72px, 16vmin, 140px);
+  height: clamp(72px, 16vmin, 140px);
   border-radius: 50%;
   border: 1px solid rgba(162, 199, 255, 0.35);
   background: rgba(7, 15, 28, 0.45);
@@ -240,8 +241,8 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: clamp(36px, 8vmin, 62px);
-  height: clamp(36px, 8vmin, 62px);
+  width: clamp(32px, 7vmin, 56px);
+  height: clamp(32px, 7vmin, 56px);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   background: rgba(113, 166, 255, 0.75);
@@ -272,8 +273,8 @@ body {
 }
 
 #attack-btn {
-  width: clamp(64px, 14vmin, 112px);
-  height: clamp(64px, 14vmin, 112px);
+  width: clamp(60px, 13vmin, 104px);
+  height: clamp(60px, 13vmin, 104px);
   left: var(--attack-left);
   right: var(--attack-right);
   bottom: var(--attack-bottom);
@@ -287,8 +288,8 @@ body {
 }
 
 #smite-btn {
-  width: clamp(52px, 11vmin, 88px);
-  height: clamp(52px, 11vmin, 88px);
+  width: clamp(48px, 10vmin, 80px);
+  height: clamp(48px, 10vmin, 80px);
   left: var(--smite-left);
   right: var(--smite-right);
   bottom: var(--smite-bottom);
@@ -312,14 +313,14 @@ body {
 }
 
 .skill-btn {
-  width: clamp(52px, 11vmin, 88px);
-  min-height: clamp(44px, 9vmin, 70px);
+  width: clamp(44px, 9vmin, 76px);
+  min-height: clamp(38px, 8vmin, 62px);
   border: none;
   border-radius: clamp(8px, 1.8vmin, 14px);
   background: linear-gradient(180deg, #5388ff, #2f4fbe);
   color: #eef5ff;
   font-weight: 700;
-  font-size: clamp(12px, 2.5vmin, 16px);
+  font-size: clamp(11px, 2.2vmin, 15px);
   line-height: 1.15;
   box-shadow: 0 5px 14px rgba(0, 0, 0, 0.32);
   display: flex;
@@ -386,9 +387,9 @@ body {
   position: absolute;
   left: var(--skill-left);
   right: var(--skill-right);
-  bottom: calc(var(--skill-bottom) + 10vmin);
+  bottom: calc(var(--skill-bottom) + 9vmin);
   width: min(360px, calc(100vw - 24px));
-  max-height: min(280px, 50vh);
+  max-height: min(280px, 48vh);
   overflow: auto;
   padding: clamp(8px, 1.5vw, 10px);
   border-radius: 12px;
@@ -635,24 +636,15 @@ body {
   font-weight: 700;
 }
 
-/* 모바일·작은 화면: 컨트롤 위치를 화면 비율로 조정 */
+/* 모바일·작은 화면: 컨트롤이 화면 밑에 가려지지 않도록 여백 강화 */
 @media (max-height: 520px), (max-width: 700px) {
   :root {
-    --left-stick-left: max(8px, env(safe-area-inset-left));
-    --left-stick-right: auto;
-    --left-stick-bottom: max(8px, env(safe-area-inset-bottom));
-    --right-stick-left: auto;
-    --right-stick-right: max(8px, env(safe-area-inset-right));
-    --right-stick-bottom: max(8px, env(safe-area-inset-bottom));
-    --attack-left: auto;
-    --attack-right: max(10vmin, calc(env(safe-area-inset-right) + 10vmin));
-    --attack-bottom: max(6px, calc(env(safe-area-inset-bottom) + 6px));
-    --smite-left: auto;
-    --smite-right: max(12vmin, calc(env(safe-area-inset-right) + 12vmin));
-    --smite-bottom: max(12vmin, calc(env(safe-area-inset-bottom) + 12vmin));
-    --skill-left: auto;
-    --skill-right: max(6vmin, calc(env(safe-area-inset-right) + 6vmin));
-    --skill-bottom: max(18vmin, calc(env(safe-area-inset-bottom) + 18vmin));
+    --ctrl-margin: max(14px, 4vmin, env(safe-area-inset-bottom));
+    --left-stick-bottom: var(--ctrl-margin);
+    --right-stick-bottom: var(--ctrl-margin);
+    --attack-bottom: var(--ctrl-margin);
+    --smite-bottom: calc(var(--ctrl-margin) + 15vmin);
+    --skill-bottom: calc(var(--ctrl-margin) + 28vmin);
   }
 }
 
